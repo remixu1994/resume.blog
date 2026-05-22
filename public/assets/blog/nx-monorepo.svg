@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-labelledby="title desc">
+  <title id="title">Nx monorepo architecture</title>
+  <desc id="desc">A technical diagram showing site, admin, api, and shared libraries connected in one workspace.</desc>
+  <rect width="960" height="640" fill="#f8fafc"/>
+  <rect x="88" y="88" width="784" height="464" fill="#ffffff" stroke="#d8dee8" stroke-width="3"/>
+  <rect x="128" y="128" width="704" height="72" fill="#101828"/>
+  <text x="158" y="174" fill="#ffffff" font-family="Arial, sans-serif" font-size="30" font-weight="700">Nx Workspace</text>
+  <g fill="#eef4ff" stroke="#0f5bd8" stroke-width="3">
+    <rect x="136" y="264" width="176" height="120"/>
+    <rect x="392" y="264" width="176" height="120"/>
+    <rect x="648" y="264" width="176" height="120"/>
+  </g>
+  <g fill="#0f172a" font-family="Arial, sans-serif" font-size="28" font-weight="700">
+    <text x="190" y="334">site</text>
+    <text x="438" y="334">admin</text>
+    <text x="704" y="334">api</text>
+  </g>
+  <rect x="248" y="452" width="464" height="64" fill="#fff7ed" stroke="#ef7d32" stroke-width="3"/>
+  <text x="356" y="493" fill="#172033" font-family="Arial, sans-serif" font-size="24" font-weight="700">shared libraries</text>
+  <g stroke="#64748b" stroke-width="4" stroke-linecap="round">
+    <path d="M224 384v36c0 18 14 32 32 32"/>
+    <path d="M480 384v68"/>
+    <path d="M736 384v36c0 18-14 32-32 32"/>
+  </g>
+</svg>

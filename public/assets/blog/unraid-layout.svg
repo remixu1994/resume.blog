@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-labelledby="title desc">
+  <title id="title">Unraid service layout</title>
+  <desc id="desc">A service layout diagram showing storage, containers, database, monitoring, and backup lanes.</desc>
+  <rect width="960" height="640" fill="#f8fafc"/>
+  <rect x="92" y="96" width="776" height="448" fill="#ffffff" stroke="#d8dee8" stroke-width="3"/>
+  <text x="132" y="156" fill="#172033" font-family="Arial, sans-serif" font-size="34" font-weight="700">Unraid Service Layout</text>
+  <g fill="#101828">
+    <rect x="132" y="210" width="164" height="270"/>
+    <rect x="318" y="210" width="164" height="270"/>
+    <rect x="504" y="210" width="164" height="270"/>
+    <rect x="690" y="210" width="136" height="270"/>
+  </g>
+  <g fill="#ffffff" font-family="Arial, sans-serif" font-size="22" font-weight="700">
+    <text x="166" y="258">Blog</text>
+    <text x="348" y="258">Data</text>
+    <text x="526" y="258">Monitor</text>
+    <text x="718" y="258">Backup</text>
+  </g>
+  <g fill="#eef4ff">
+    <rect x="154" y="302" width="120" height="40"/>
+    <rect x="154" y="358" width="120" height="40"/>
+    <rect x="340" y="302" width="120" height="40"/>
+    <rect x="340" y="358" width="120" height="40"/>
+    <rect x="526" y="302" width="120" height="40"/>
+    <rect x="526" y="358" width="120" height="40"/>
+    <rect x="710" y="302" width="96" height="40"/>
+    <rect x="710" y="358" width="96" height="40"/>
+  </g>
+  <g fill="#0f5bd8" font-family="Arial, sans-serif" font-size="16" font-weight="700">
+    <text x="180" y="328">Site</text>
+    <text x="186" y="384">API</text>
+    <text x="362" y="328">Postgres</text>
+    <text x="368" y="384">Media</text>
+    <text x="548" y="328">Logs</text>
+    <text x="550" y="384">Health</text>
+    <text x="730" y="328">NAS</text>
+    <text x="728" y="384">Sync</text>
+  </g>
+  <path d="M154 508h652" stroke="#ef7d32" stroke-width="8" stroke-linecap="round"/>
+</svg>

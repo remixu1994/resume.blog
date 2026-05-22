@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="Content platform architecture">
+  <rect width="1200" height="720" fill="#f7f2ea"/>
+  <path d="M0 120 C260 20 420 240 640 130 C860 20 1000 120 1200 70 L1200 720 L0 720 Z" fill="#dceee8"/>
+  <g fill="none" stroke="#0f6b5f" stroke-width="4">
+    <rect x="130" y="170" width="250" height="160" rx="18"/>
+    <rect x="475" y="170" width="250" height="160" rx="18"/>
+    <rect x="820" y="170" width="250" height="160" rx="18"/>
+    <rect x="300" y="430" width="600" height="120" rx="18"/>
+    <path d="M380 250 H475M725 250 H820M600 330 V430"/>
+  </g>
+  <g fill="#171717" font-family="Segoe UI, sans-serif" font-size="34" font-weight="700">
+    <text x="185" y="260">Edit</text>
+    <text x="535" y="260">Publish</text>
+    <text x="870" y="260">Deliver</text>
+    <text x="440" y="505">Shared Content Model</text>
+  </g>
+</svg>
