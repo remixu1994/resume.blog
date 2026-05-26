@@ -12,43 +12,63 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
 
   return (
     <>
-      <header className="article-hero">
-        <p className="eyebrow">{dictionary.resume.title}</p>
-        <h1 className="page-title">{resume.name}</h1>
-        <p className="lede">{resume.headline}</p>
-        <p className="lede">{resume.intro}</p>
-        <div className="button-row">
-          <a className="button" href="/resume/moon-devfolio-resume.pdf">
-            {dictionary.resume.download}
-          </a>
-          {contactEmail ? (
-            <a className="button-muted" href={`mailto:${contactEmail}`} aria-label={`${contactLabel}: ${contactEmail}`}>
-              {contactLabel}
+      <header className="article-hero resume-hero">
+        <div className="resume-hero-copy">
+          <p className="eyebrow">{dictionary.resume.title}</p>
+          <h1 className="page-title">{resume.name}</h1>
+          <p className="lede">{resume.headline}</p>
+          <p className="lede">{resume.intro}</p>
+          <div className="button-row">
+            <a className="button" href="/resume/moon-devfolio-resume.pdf">
+              {dictionary.resume.download}
             </a>
-          ) : null}
+            {contactEmail ? (
+              <a className="button-muted" href={`mailto:${contactEmail}`} aria-label={`${contactLabel}: ${contactEmail}`}>
+                {contactLabel}
+              </a>
+            ) : null}
+          </div>
         </div>
+        <aside className="resume-hero-metrics" aria-label={dictionary.resume.title}>
+          {resume.heroMetrics.map((metric) => (
+            <div className="metric" key={metric.label}>
+              <span className="eyebrow">{metric.label}</span>
+              <strong>{metric.value}</strong>
+            </div>
+          ))}
+        </aside>
       </header>
 
-      <section className="grid-3">
-        {resume.heroMetrics.map((metric) => (
-          <div className="panel" key={metric.label}>
-            <p className="eyebrow">{metric.label}</p>
-            <h2 className="section-title">{metric.value}</h2>
+      <section className="resume-scan-grid">
+        <article className="article-panel summary-panel">
+          <p className="eyebrow">{resume.labels.professionalSummary}</p>
+          <ul className="check-list">
+            {resume.summaryPoints.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+        </article>
+        <aside className="panel skill-panel">
+          <p className="eyebrow">{resume.labels.competences}</p>
+          <div className="skill-grid">
+            {resume.skillGroups.map((group) => (
+              <div className="skill-row" key={group.title}>
+                <h3>{group.title}</h3>
+                <div className="tag-row">
+                  {group.items.map((item) => (
+                    <span className="tag" key={item}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </aside>
       </section>
 
-      <section className="section content-grid">
+      <section className="section content-grid resume-content-grid">
         <div className="list">
-          <article className="article-panel">
-            <p className="eyebrow">{resume.labels.professionalSummary}</p>
-            {resume.summaryPoints.map((point) => (
-              <p className="lede" key={point}>
-                {point}
-              </p>
-            ))}
-          </article>
-
           <article className="article-panel">
             <p className="eyebrow">{resume.labels.projectExperience}</p>
             <div className="list">
@@ -79,29 +99,12 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
         </div>
 
         <aside className="list">
-          <section className="dark-panel">
+          <section className="panel profile-panel">
             <p className="eyebrow">{resume.labels.profile}</p>
             <p>{resume.location}</p>
             <p>{resume.gender}</p>
             <p>{resume.age}</p>
             {resume.drivingLicense ? <p>{resume.drivingLicense}</p> : null}
-          </section>
-          <section className="panel">
-            <p className="eyebrow">{resume.labels.competences}</p>
-            <div className="list">
-              {resume.skillGroups.map((group) => (
-                <div className="item" key={group.title}>
-                  <h3>{group.title}</h3>
-                  <div className="tag-row">
-                    {group.items.map((item) => (
-                      <span className="tag" key={item}>
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
           </section>
           <section className="panel">
             <p className="eyebrow">{resume.labels.education}</p>
@@ -129,11 +132,16 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
 
 function ProjectBlock({ project, labels }: { project: ResumeProject; labels: ReturnType<typeof getResumeViewModel>['resume']['labels'] }) {
   return (
-    <section className="item">
-      <p className="article-meta">
-        {project.period} / {project.role}
-      </p>
-      <h2>{project.title}</h2>
+    <section className="item project-item">
+      <div className="project-item-head">
+        <div>
+          <p className="article-meta">
+            {project.period} / {project.role}
+          </p>
+          <h2>{project.title}</h2>
+        </div>
+        {project.showcase ? <ResumeProjectShowcase project={project} labels={labels} /> : null}
+      </div>
       <p>{project.summary}</p>
       <div className="tag-row">
         {project.stack.map((item) => (
@@ -147,9 +155,6 @@ function ProjectBlock({ project, labels }: { project: ResumeProject; labels: Ret
           <li key={highlight}>{highlight}</li>
         ))}
       </ul>
-      {project.showcase ? (
-        <ResumeProjectShowcase project={project} labels={labels} />
-      ) : null}
     </section>
   );
 }

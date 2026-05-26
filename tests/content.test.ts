@@ -6,8 +6,8 @@ describe('content selectors', () => {
     const zh = getHomeViewModel('zh');
     const en = getHomeViewModel('en');
 
-    expect(zh.dictionary.brand).toBe('Moon Devfolio');
-    expect(en.dictionary.brand).toBe('Moon Devfolio');
+    expect(zh.dictionary.brand).toBe('Remi Resume');
+    expect(en.dictionary.brand).toBe('Remi Resume');
     expect(zh.featured.featuredCases.length).toBeGreaterThan(0);
     expect(en.featured.topicCards.length).toBeGreaterThan(0);
   });

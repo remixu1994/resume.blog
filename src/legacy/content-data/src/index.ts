@@ -606,7 +606,7 @@ const beisenMessageRefactorShowcaseEn: ResumeProjectShowcase = {
 export const resumeProfiles: Record<Locale, ResumeProfile> = {
   zh: {
     locale: 'zh',
-    name: 'Yueming Xu',
+    name: '许玥明',
     title: '全栈工程师',
     headline: '10 年软件开发经验 / 5 年系统架构设计经验的全栈工程师',
     location: '成都',

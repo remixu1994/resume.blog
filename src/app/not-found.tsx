@@ -7,7 +7,7 @@ export default function NotFound() {
       <h1>Page not found</h1>
       <p>The page may have moved during the migration.</p>
       <Link className="button" href="/zh">
-        Back to Moon Devfolio
+        Back to Remi Resume
       </Link>
     </main>
   );

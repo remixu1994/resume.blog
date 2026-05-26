@@ -4,18 +4,18 @@
 
 @layer base {
   :root {
-    --bg: #f7f2ea;
-    --paper: #fffaf2;
-    --ink: #171717;
-    --muted: #6f6a61;
-    --line: rgba(23, 23, 23, 0.14);
-    --accent: #0f6b5f;
-    --accent-strong: #08483f;
-    --accent-soft: #dceee8;
-    --warm: #c35d2e;
-    --shadow: 0 24px 80px rgba(23, 23, 23, 0.09);
-    --display: Georgia, "Times New Roman", serif;
-    --sans: "Aptos", "Segoe UI", sans-serif;
+    --bg: #f5f7f6;
+    --paper: #ffffff;
+    --ink: #101514;
+    --muted: #5f6a67;
+    --line: rgba(16, 21, 20, 0.12);
+    --accent: #075f52;
+    --accent-strong: #043d35;
+    --accent-soft: #e2f0ed;
+    --warm: #b75b36;
+    --shadow: 0 20px 60px rgba(16, 21, 20, 0.08);
+    --display: Georgia, "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+    --sans: "Aptos", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     --mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
   }
 
@@ -26,9 +26,11 @@
   body {
     @apply m-0 bg-bg font-sans text-ink;
     background:
-      radial-gradient(circle at 15% 0%, rgba(15, 107, 95, 0.16), transparent 30rem),
-      radial-gradient(circle at 90% 12%, rgba(195, 93, 46, 0.14), transparent 26rem),
-      linear-gradient(180deg, #fbf6ee 0%, var(--bg) 42%, #eee6d9 100%);
+      linear-gradient(90deg, rgba(7, 95, 82, 0.045) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(7, 95, 82, 0.035) 1px, transparent 1px),
+      linear-gradient(180deg, #ffffff 0%, var(--bg) 46%, #eef3f1 100%);
+    background-size: 56px 56px, 56px 56px, auto;
+    overflow-x: hidden;
   }
 
   body.modal-open {
@@ -42,6 +44,10 @@
   img {
     @apply block max-w-full;
   }
+
+  ::selection {
+    @apply bg-accent text-white;
+  }
 }
 
 @layer components {
@@ -51,7 +57,7 @@
 
   .site-header {
     @apply sticky top-0 z-20 border-b border-line;
-    background: rgba(247, 242, 234, 0.82);
+    background: rgba(255, 255, 255, 0.86);
     backdrop-filter: blur(18px);
   }
 
@@ -59,7 +65,7 @@
   .site-main,
   .site-footer {
     @apply mx-auto;
-    width: min(1180px, calc(100% - 32px));
+    width: min(1260px, calc(100% - 40px));
   }
 
   .header-inner {
@@ -67,20 +73,20 @@
   }
 
   .brand {
-    @apply grid min-w-max gap-0.5;
+    @apply grid min-w-max gap-1;
   }
 
   .brand strong {
-    @apply font-display text-xl;
+    @apply font-display text-[1.35rem] font-semibold leading-none;
   }
 
   .brand span,
   .eyebrow {
-    @apply font-mono text-[0.68rem] uppercase tracking-[0.22em] text-muted;
+    @apply font-mono text-[0.68rem] uppercase tracking-[0.18em] text-muted;
   }
 
   .nav {
-    @apply flex flex-wrap items-center justify-end gap-x-[18px] gap-y-3 text-[0.92rem] text-muted;
+    @apply flex flex-wrap items-center justify-end gap-x-7 gap-y-3 text-[0.88rem] font-semibold text-muted;
   }
 
   .nav a,
@@ -93,34 +99,33 @@
     @apply text-accent;
   }
 
+  .text-link {
+    @apply inline-flex items-center gap-2 text-[0.9rem] font-bold text-accent;
+  }
+
+  .text-link::after {
+    content: "->";
+    @apply font-mono text-[0.8rem];
+  }
+
   .site-main {
-    @apply py-11 pb-[72px];
+    @apply py-11 pb-20;
   }
 
   .site-footer {
-    @apply border-t border-line py-7 pb-11 text-muted;
+    @apply border-t border-line py-8 pb-12 text-[0.92rem] text-muted;
   }
 
   .hero {
-    @apply grid items-stretch gap-7;
-    grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-  }
-
-  .hero-panel,
-  .panel,
-  .article-panel,
-  .dark-panel,
-  .media-panel {
-    @apply border border-line;
-    background: rgba(255, 250, 242, 0.82);
+    @apply grid overflow-hidden rounded-lg border border-line bg-paper shadow-editorial;
+    min-height: 560px;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 0.48fr);
   }
 
   .hero-panel {
-    @apply min-h-[520px] text-white;
-    padding: clamp(32px, 7vw, 84px);
-    background:
-      linear-gradient(rgba(23, 23, 23, 0.22), rgba(23, 23, 23, 0.26)),
-      url("/assets/books/bookshelf-2.jpg") center/cover;
+    @apply flex flex-col justify-between gap-10 p-9;
+    padding: clamp(32px, 6vw, 72px);
+    min-width: 0;
   }
 
   .hero-panel h1,
@@ -131,13 +136,14 @@
   }
 
   .hero-panel h1 {
-    @apply mt-[18px] max-w-[760px];
-    font-size: clamp(3rem, 8vw, 7.6rem);
-    line-height: 0.92;
+    @apply max-w-[760px];
+    font-size: clamp(3.5rem, 7vw, 6.8rem);
+    line-height: 0.95;
+    overflow-wrap: anywhere;
   }
 
-  .hero-panel p {
-    @apply max-w-[620px] text-[1.05rem] leading-[1.8] text-white/85;
+  .hero-panel p:not(.eyebrow) {
+    @apply mt-6 max-w-[680px] text-[1.16rem] leading-[1.9] text-[#26302e];
   }
 
   .hero-actions,
@@ -148,20 +154,19 @@
 
   .button,
   .button-muted {
-    @apply inline-flex min-h-11 min-w-[132px] items-center justify-center border px-5 font-bold transition;
-    transition-property: background, border-color, color, transform;
+    @apply inline-flex min-h-11 min-w-[132px] items-center justify-center rounded-md border px-5 text-[0.92rem] font-bold transition;
+    transition-property: background, border-color, color, transform, box-shadow;
     transition-duration: 160ms;
     transition-timing-function: ease;
   }
 
   .button {
     @apply border-accent bg-accent text-white;
+    box-shadow: 0 10px 24px rgba(7, 95, 82, 0.18);
   }
 
   .button-muted {
-    @apply text-accent-strong;
-    background: rgba(255, 250, 242, 0.9);
-    border-color: rgba(15, 107, 95, 0.34);
+    @apply border-line bg-white text-accent-strong;
   }
 
   .button:hover,
@@ -183,9 +188,31 @@
   }
 
   .button:focus-visible,
-  .button-muted:focus-visible {
+  .button-muted:focus-visible,
+  .showcase-tab:focus-visible,
+  .showcase-image-button:focus-visible,
+  .showcase-backdrop:focus-visible,
+  .image-preview-backdrop:focus-visible {
     @apply outline outline-4 outline-offset-[3px];
-    outline-color: rgba(195, 93, 46, 0.38);
+    outline-color: rgba(183, 91, 54, 0.34);
+  }
+
+  .hero-metrics,
+  .resume-hero-metrics {
+    @apply grid border-t border-line;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .metric {
+    @apply min-w-0 border-r border-line py-6 pr-5;
+  }
+
+  .metric:last-child {
+    @apply border-r-0;
+  }
+
+  .metric strong {
+    @apply mt-2 block font-display text-[2rem] leading-none;
   }
 
   .hero-side,
@@ -198,34 +225,118 @@
   }
 
   .hero-side {
-    grid-template-rows: 1fr auto;
+    @apply border-l border-line bg-[#fbfcfb] p-8;
+    grid-template-rows: minmax(0, 1fr) auto;
   }
 
-  .dark-panel {
-    @apply bg-ink p-7 text-white;
+  .system-map {
+    @apply relative min-h-[360px] overflow-hidden;
+    background:
+      linear-gradient(90deg, rgba(7, 95, 82, 0.08) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(7, 95, 82, 0.08) 1px, transparent 1px);
+    background-size: 42px 42px;
+  }
+
+  .system-map::before,
+  .system-map::after {
+    content: "";
+    @apply absolute border;
+    border-color: rgba(7, 95, 82, 0.4);
+  }
+
+  .system-map::before {
+    @apply left-[18%] top-[19%] h-28 w-40 rounded-md;
+  }
+
+  .system-map::after {
+    @apply bottom-[18%] right-[8%] h-36 w-36 rotate-45 rounded-lg;
+  }
+
+  .node,
+  .connector,
+  .core-cube {
+    @apply absolute block;
+  }
+
+  .node {
+    @apply h-3 w-3 rounded-full bg-accent;
+  }
+
+  .node-a {
+    @apply left-[10%] top-[32%];
+  }
+
+  .node-b {
+    @apply left-[44%] top-[20%];
+  }
+
+  .node-c {
+    @apply bottom-[30%] left-[34%];
+  }
+
+  .node-d {
+    @apply bottom-[18%] right-[18%];
+  }
+
+  .connector {
+    @apply h-px origin-left;
+    background: rgba(7, 95, 82, 0.35);
+  }
+
+  .connector-a {
+    @apply left-[12%] top-[34%] w-[36%] rotate-[-11deg];
+  }
+
+  .connector-b {
+    @apply left-[36%] top-[57%] w-[46%] rotate-[18deg];
+  }
+
+  .connector-c {
+    @apply left-[46%] top-[22%] w-[32%] rotate-[35deg];
+  }
+
+  .core-cube {
+    @apply right-[20%] top-[34%] h-20 w-20 rounded-md border border-accent bg-accent-soft;
+    box-shadow: inset 0 0 0 18px rgba(7, 95, 82, 0.12);
+    transform: rotate(45deg);
   }
 
   .panel,
   .article-panel,
+  .dark-panel,
   .media-panel {
-    @apply p-7;
+    @apply rounded-md border border-line bg-paper p-7;
+  }
+
+  .dark-panel {
+    @apply bg-ink text-white;
   }
 
   .section {
-    @apply mt-[30px];
+    @apply mt-10;
+  }
+
+  .section-band {
+    @apply rounded-lg border border-line bg-paper p-8 shadow-editorial;
   }
 
   .section-head {
-    @apply mb-4 flex items-end justify-between gap-5;
+    @apply mb-5 flex items-end justify-between gap-5;
+  }
+
+  .home-section-head {
+    @apply border-b border-line pb-6;
   }
 
   .section-title {
-    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.05;
   }
 
   .page-title {
-    font-size: clamp(2.8rem, 8vw, 6rem);
-    line-height: 0.98;
+    font-size: clamp(3.5rem, 8vw, 6rem);
+    line-height: 0.95;
+    overflow-wrap: anywhere;
   }
 
   .article-title {
@@ -235,7 +346,8 @@
   }
 
   .lede {
-    @apply text-base leading-[1.8] text-muted;
+    @apply text-base leading-[1.85] text-muted;
+    overflow-wrap: anywhere;
   }
 
   .grid-2 {
@@ -246,50 +358,175 @@
     @apply grid-cols-3;
   }
 
+  .compact-grid {
+    @apply gap-0;
+  }
+
+  .compact-grid > * {
+    @apply rounded-none border-0 border-r border-line bg-transparent;
+  }
+
+  .compact-grid > *:last-child {
+    @apply border-r-0;
+  }
+
   .content-grid {
     @apply items-start;
     grid-template-columns: minmax(0, 1fr) 320px;
   }
 
+  .home-content-grid {
+    @apply grid rounded-lg border border-line bg-paper shadow-editorial;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+  }
+
+  .content-column,
+  .topic-rail {
+    @apply p-8;
+    min-width: 0;
+  }
+
+  .topic-rail {
+    @apply border-l border-line bg-[#fbfcfb];
+  }
+
   .list {
-    @apply gap-3.5;
+    @apply gap-0;
   }
 
   .item {
-    @apply border-t border-line pt-[18px];
+    @apply block border-t border-line py-5 transition-colors;
+  }
+
+  a.item:hover,
+  a.panel.item:hover {
+    background: rgba(226, 240, 237, 0.4);
   }
 
   .item h3,
   .item h2 {
-    @apply m-0 text-[1.35rem];
+    @apply m-0 text-[1.32rem] leading-snug;
   }
 
   .item p {
-    @apply leading-[1.7] text-muted;
-  }
-
-  .metric {
-    @apply border-t border-white/20 pt-[18px];
-  }
-
-  .metric strong {
-    @apply block font-display text-[2.1rem];
+    @apply leading-[1.75] text-muted;
+    overflow-wrap: anywhere;
   }
 
   .tag {
-    @apply inline-flex bg-accent-soft px-2.5 py-1.5 text-[0.78rem] font-bold text-accent-strong;
+    @apply inline-flex rounded bg-accent-soft px-2.5 py-1.5 text-[0.74rem] font-bold text-accent-strong;
   }
 
   .article-hero {
-    @apply mb-7 border-b border-line pb-[30px];
+    @apply mb-8 border-b border-line pb-10;
   }
 
   .article-meta {
-    @apply font-mono text-[0.78rem] tracking-[0.08em] text-muted;
+    @apply font-mono text-[0.75rem] tracking-[0.08em] text-muted;
+  }
+
+  .resume-hero {
+    @apply grid gap-10 rounded-lg border border-line bg-paper p-10 shadow-editorial;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.34fr);
+  }
+
+  .resume-hero-copy {
+    @apply max-w-[850px];
+    min-width: 0;
+  }
+
+  .resume-hero-copy .lede {
+    @apply max-w-[760px];
+  }
+
+  .resume-hero-metrics {
+    @apply border-t-0 border-l border-line pl-8;
+    grid-template-columns: 1fr;
+  }
+
+  .resume-hero-metrics .metric {
+    @apply border-r-0 border-b border-line py-6 pr-0;
+  }
+
+  .resume-hero-metrics .metric:last-child {
+    @apply border-b-0;
+  }
+
+  .resume-scan-grid {
+    @apply mt-8 grid rounded-lg border border-line bg-paper shadow-editorial;
+    grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1fr);
+  }
+
+  .summary-panel,
+  .skill-panel {
+    @apply rounded-none border-0 bg-transparent;
+    min-width: 0;
+  }
+
+  .summary-panel {
+    @apply border-r border-line;
+  }
+
+  .check-list {
+    @apply m-0 grid list-none gap-4 p-0 text-[0.96rem] leading-[1.85] text-[#273331];
+  }
+
+  .check-list li {
+    @apply relative pl-7;
+  }
+
+  .check-list li::before {
+    content: "✓";
+    @apply absolute left-0 top-0 font-bold text-accent;
+  }
+
+  .skill-grid {
+    @apply grid gap-5;
+  }
+
+  .skill-row {
+    @apply grid gap-3 border-t border-line pt-4;
+    grid-template-columns: minmax(120px, 0.26fr) minmax(0, 1fr);
+  }
+
+  .skill-row:first-child {
+    @apply border-t-0 pt-0;
+  }
+
+  .skill-row h3 {
+    @apply m-0 text-[1rem] leading-snug;
+  }
+
+  .resume-content-grid {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+
+  .profile-panel p:not(.eyebrow) {
+    @apply mb-2 mt-0 font-bold;
+  }
+
+  .project-item {
+    @apply rounded-md border border-line px-6 py-6;
+  }
+
+  .project-item + .project-item {
+    @apply mt-5;
+  }
+
+  .project-item-head {
+    @apply mb-4 flex items-start justify-between gap-5;
+  }
+
+  .project-item .showcase-entry {
+    @apply m-0 border-0 p-0;
+  }
+
+  .project-item .button {
+    @apply min-w-[118px] whitespace-nowrap;
   }
 
   .markdown-body {
-    @apply text-[1.04rem] leading-[1.9] text-[#28251f];
+    @apply text-[1.04rem] leading-[1.9] text-[#26302e];
   }
 
   .markdown-body h2,
@@ -298,7 +535,7 @@
   }
 
   .markdown-body img {
-    @apply my-6 border border-line;
+    @apply my-6 rounded-md border border-line;
   }
 
   .showcase-entry {
@@ -311,14 +548,14 @@
 
   .showcase-backdrop {
     @apply absolute inset-0 cursor-default border-0;
-    background: rgba(23, 23, 23, 0.42);
+    background: rgba(16, 21, 20, 0.42);
     backdrop-filter: blur(10px);
   }
 
   .showcase-panel {
     @apply relative z-[1] flex h-full max-w-full flex-col border-l border-line bg-bg;
     width: min(100vw, 920px);
-    box-shadow: -24px 0 60px rgba(23, 32, 51, 0.16);
+    box-shadow: -24px 0 60px rgba(16, 21, 20, 0.16);
   }
 
   .showcase-panel-header {
@@ -335,12 +572,11 @@
   }
 
   .showcase-tabs {
-    @apply flex gap-2.5 overflow-x-auto border-b border-line px-8 py-3.5;
-    background: rgba(255, 250, 242, 0.92);
+    @apply flex gap-2.5 overflow-x-auto border-b border-line bg-paper px-8 py-3.5;
   }
 
   .showcase-tab {
-    @apply min-h-[38px] flex-none cursor-pointer border border-line bg-white px-4 text-[0.92rem] font-bold text-muted;
+    @apply min-h-[38px] flex-none cursor-pointer rounded-md border border-line bg-white px-4 text-[0.88rem] font-bold text-muted;
     font: inherit;
   }
 
@@ -348,21 +584,13 @@
     @apply border-accent bg-accent text-white;
   }
 
-  .showcase-tab:focus-visible,
-  .showcase-image-button:focus-visible,
-  .showcase-backdrop:focus-visible,
-  .image-preview-backdrop:focus-visible {
-    @apply outline outline-4 outline-offset-[3px];
-    outline-color: rgba(195, 93, 46, 0.38);
-  }
-
   .showcase-scroll {
     @apply flex-1 overflow-y-auto px-8 pb-9 pt-7;
   }
 
   .status-pill {
-    @apply inline-flex px-3 py-2 font-mono text-[0.68rem] font-bold uppercase tracking-[0.22em] text-muted;
-    background: rgba(23, 23, 23, 0.1);
+    @apply inline-flex rounded px-3 py-2 font-mono text-[0.68rem] font-bold uppercase tracking-[0.18em] text-muted;
+    background: rgba(16, 21, 20, 0.08);
   }
 
   .status-pill.ready {
@@ -374,7 +602,7 @@
   }
 
   .showcase-group {
-    @apply border border-line bg-white p-[22px];
+    @apply rounded-md border border-line bg-white p-[22px];
   }
 
   .showcase-dialog-block {
@@ -386,7 +614,7 @@
   }
 
   .showcase-block-copy h3 {
-    @apply my-2 text-[1.35rem];
+    @apply my-2 text-[1.28rem];
   }
 
   .showcase-block-copy p:not(.eyebrow) {
@@ -394,12 +622,12 @@
   }
 
   .showcase-image-button {
-    @apply grid cursor-zoom-in gap-2.5 border border-line bg-paper p-2.5 text-left font-bold text-accent-strong;
+    @apply grid cursor-zoom-in gap-2.5 rounded-md border border-line bg-paper p-2.5 text-left font-bold text-accent-strong;
     font: inherit;
   }
 
   .showcase-image-button img {
-    @apply w-full border border-line bg-white;
+    @apply w-full rounded border border-line bg-white;
   }
 
   .image-preview {
@@ -408,7 +636,7 @@
 
   .image-preview-backdrop {
     @apply absolute inset-0 border-0;
-    background: rgba(23, 23, 23, 0.7);
+    background: rgba(16, 21, 20, 0.72);
   }
 
   .image-preview figure {
@@ -424,7 +652,282 @@
   }
 
   .recipe-hero {
-    @apply aspect-[16/8] w-full border border-line object-cover;
+    @apply aspect-[16/8] w-full rounded-md border border-line object-cover;
+  }
+
+  .shelf-hero,
+  .recipe-index-hero,
+  .recipe-detail-hero {
+    @apply grid gap-10 rounded-lg border border-line bg-paper p-10 shadow-editorial;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.36fr);
+  }
+
+  .shelf-note,
+  .recipe-stats {
+    @apply rounded-md border border-line bg-[#fbfcfb] p-7;
+  }
+
+  .shelf-note p:not(.eyebrow) {
+    @apply m-0 leading-[1.85] text-muted;
+  }
+
+  .books-proof-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.38fr);
+  }
+
+  .books-proof-note {
+    @apply grid gap-7;
+  }
+
+  .books-proof-note .metric {
+    @apply border-r-0 border-b border-line pb-7 pr-0 pt-0;
+  }
+
+  .books-proof-note .metric strong {
+    @apply text-[2.8rem];
+  }
+
+  .books-proof-hero > *,
+  .books-path-section > *,
+  .proof-book-card > *,
+  .proof-book-copy > * {
+    min-width: 0;
+  }
+
+  .shelf-featured {
+    @apply mt-0;
+  }
+
+  .books-path {
+    @apply grid gap-8;
+  }
+
+  .books-path-section {
+    @apply grid gap-6 rounded-lg border border-line bg-paper p-8 shadow-editorial;
+    grid-template-columns: minmax(220px, 0.28fr) minmax(0, 1fr);
+  }
+
+  .books-path-heading {
+    @apply sticky top-24 grid content-start gap-5 self-start;
+  }
+
+  .books-path-heading > span {
+    @apply font-display text-5xl font-black leading-none text-accent;
+  }
+
+  .proof-book-list {
+    @apply grid gap-5;
+  }
+
+  .proof-book-card {
+    @apply grid overflow-hidden rounded-md border border-line bg-[#fbfcfb];
+    grid-template-columns: 150px minmax(0, 1fr);
+  }
+
+  .proof-book-cover {
+    @apply grid min-h-[220px] place-items-center border-r border-line bg-white p-4;
+  }
+
+  .proof-book-cover img {
+    @apply max-h-[190px] w-auto rounded shadow-editorial;
+  }
+
+  .proof-book-copy {
+    @apply grid gap-5 p-6;
+  }
+
+  .proof-book-copy h3 {
+    @apply m-0 font-display text-2xl leading-tight;
+  }
+
+  .book-author {
+    @apply mb-0 mt-2 text-sm font-semibold text-muted;
+  }
+
+  .proof-points {
+    @apply grid gap-0 border-t border-line;
+  }
+
+  .proof-points section {
+    @apply grid gap-2 border-b border-line py-4;
+    grid-template-columns: minmax(120px, 0.24fr) minmax(0, 1fr);
+  }
+
+  .proof-points section:last-child {
+    @apply border-b-0 pb-0;
+  }
+
+  .proof-points strong {
+    @apply text-[0.9rem] leading-relaxed text-accent-strong;
+  }
+
+  .proof-points p {
+    @apply m-0 leading-[1.75] text-muted;
+  }
+
+  .book-cover-grid {
+    @apply grid gap-5;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .book-card {
+    @apply grid rounded-md border border-line bg-[#fbfcfb] transition;
+    grid-template-rows: auto 1fr;
+  }
+
+  .book-card:hover,
+  .recipe-card:hover,
+  .reading-group:hover {
+    @apply -translate-y-px;
+    box-shadow: 0 16px 34px rgba(16, 21, 20, 0.08);
+  }
+
+  .book-cover-frame {
+    @apply grid aspect-[4/5] place-items-center overflow-hidden rounded-t-md border-b border-line bg-white p-6;
+  }
+
+  .book-cover-frame img {
+    @apply h-full w-auto rounded shadow-editorial;
+  }
+
+  .book-card-copy {
+    @apply grid gap-3 p-5;
+  }
+
+  .book-card-copy h2,
+  .reading-group h2,
+  .recipe-card-copy h2 {
+    @apply m-0 text-[1.35rem] leading-snug;
+  }
+
+  .book-card-copy p,
+  .reading-group p,
+  .recipe-card-copy p {
+    @apply m-0 leading-[1.75] text-muted;
+  }
+
+  .book-takeaway {
+    @apply border-t border-line pt-3;
+  }
+
+  .reading-path-grid {
+    @apply grid gap-5;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reading-group {
+    @apply rounded-lg border border-line bg-paper p-7 transition;
+  }
+
+  .recipe-stats {
+    @apply grid gap-0 p-0;
+  }
+
+  .recipe-stats .metric {
+    @apply border-r-0 border-b border-line px-7;
+  }
+
+  .recipe-stats .metric:last-child {
+    @apply border-b-0;
+  }
+
+  .recipe-card-grid {
+    @apply grid gap-6;
+  }
+
+  .recipe-card {
+    @apply grid overflow-hidden rounded-lg border border-line bg-paper shadow-editorial transition;
+    grid-template-columns: minmax(300px, 0.42fr) minmax(0, 1fr);
+  }
+
+  .recipe-card-media {
+    @apply min-h-[320px] border-r border-line bg-[#fbfcfb];
+  }
+
+  .recipe-card-media img,
+  .recipe-detail-media img {
+    @apply h-full w-full object-cover;
+  }
+
+  .recipe-card-copy {
+    @apply grid content-center gap-4 p-8;
+  }
+
+  .recipe-detail-copy {
+    @apply min-w-0;
+  }
+
+  .recipe-detail-media {
+    @apply overflow-hidden rounded-md border border-line bg-[#fbfcfb];
+    min-height: 320px;
+  }
+
+  .recipe-detail-grid {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+
+  .recipe-method {
+    @apply grid gap-10;
+  }
+
+  .recipe-step-list {
+    @apply grid gap-6;
+  }
+
+  .recipe-step {
+    @apply grid gap-5 border-t border-line pt-6;
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .recipe-step > span {
+    @apply font-display text-3xl font-black leading-none text-accent;
+  }
+
+  .recipe-step h2 {
+    @apply mb-3 font-display text-2xl leading-tight;
+  }
+
+  .recipe-step ul,
+  .recipe-note-block ul {
+    @apply m-0 grid gap-2 pl-5 text-muted;
+  }
+
+  .recipe-step li,
+  .recipe-note-block li {
+    @apply pl-1 leading-7;
+  }
+
+  .recipe-note-block {
+    @apply rounded-md border border-line bg-[#fbfcf9] p-6;
+  }
+
+  .recipe-ingredients {
+    @apply sticky top-24 grid gap-6;
+  }
+
+  .ingredient-group {
+    @apply grid gap-3;
+  }
+
+  .ingredient-list {
+    @apply m-0 grid list-none gap-0 p-0;
+  }
+
+  .ingredient-list li {
+    @apply grid items-baseline gap-x-4 gap-y-1 border-t border-line py-3 text-[0.95rem];
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ingredient-list span {
+    @apply text-muted;
+  }
+
+  .ingredient-list strong {
+    @apply text-right;
+  }
+
+  .ingredient-list small {
+    @apply col-span-2 -mt-1 text-xs text-muted;
   }
 
   .not-found {
@@ -433,24 +936,234 @@
 }
 
 @layer utilities {
-  @media (max-width: 860px) {
-    .header-inner {
-      @apply flex-col items-start py-4;
-    }
-
+  @media (max-width: 980px) {
     .hero,
+    .home-content-grid,
+    .resume-hero,
+    .resume-scan-grid,
+    .shelf-hero,
+    .books-proof-hero,
+    .books-path-section,
+    .recipe-index-hero,
+    .recipe-detail-hero,
+    .book-cover-grid,
+    .reading-path-grid,
+    .recipe-card,
+    .recipe-detail-grid,
+    .content-grid,
     .grid-2,
-    .grid-3,
-    .content-grid {
+    .grid-3 {
       @apply grid-cols-1;
     }
 
-    .hero-panel {
-      @apply min-h-[460px];
+    .hero-side,
+    .topic-rail,
+    .summary-panel,
+    .resume-hero-metrics,
+    .recipe-card-media {
+      @apply border-l-0;
     }
 
-    .section-head {
+    .hero-side,
+    .topic-rail {
+      @apply border-t border-line;
+    }
+
+    .recipe-card-media {
+      @apply border-r-0 border-b border-line;
+    }
+
+    .books-path-heading {
+      @apply static;
+    }
+
+    .recipe-ingredients {
+      @apply static;
+    }
+
+    .summary-panel {
+      @apply border-r-0 border-b border-line;
+    }
+
+    .resume-hero-metrics {
+      @apply pl-0;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .resume-hero-metrics .metric {
+      @apply border-b-0 border-r border-line;
+    }
+
+    .resume-hero-metrics .metric:last-child {
+      @apply border-r-0;
+    }
+
+    .compact-grid > * {
+      @apply border-r-0 border-b border-line;
+    }
+
+    .compact-grid > *:last-child {
+      @apply border-b-0;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .header-inner {
+      @apply min-h-0 flex-col items-start gap-4 py-4;
+      width: min(1260px, calc(100% - 28px));
+    }
+
+    .site-main,
+    .site-footer {
+      width: min(1260px, calc(100% - 28px));
+    }
+
+    .nav {
+      @apply justify-start gap-x-4 text-[0.82rem];
+    }
+
+    .brand {
+      @apply min-w-0;
+      width: 100%;
+    }
+
+    .brand span {
+      @apply block whitespace-normal;
+      overflow-wrap: anywhere;
+    }
+
+    .hero,
+    .section-band,
+    .home-content-grid,
+    .resume-hero,
+    .resume-scan-grid,
+    .shelf-hero,
+    .books-proof-hero,
+    .recipe-index-hero,
+    .recipe-detail-hero,
+    .recipe-card {
+      @apply rounded-md;
+    }
+
+    .hero {
+      min-height: auto;
+    }
+
+    .hero-panel,
+    .content-column,
+    .topic-rail,
+    .resume-hero,
+    .summary-panel,
+    .skill-panel,
+    .shelf-hero,
+    .books-proof-hero,
+    .books-path-section,
+    .recipe-index-hero,
+    .recipe-detail-hero,
+    .book-card-copy,
+    .reading-group,
+    .recipe-card-copy {
+      @apply p-5;
+    }
+
+    .hero-panel h1,
+    .page-title {
+      font-size: clamp(2.3rem, 11vw, 3.05rem);
+      line-height: 1;
+      word-break: break-all;
+      line-break: anywhere;
+    }
+
+    .books-proof-hero .page-title {
+      font-size: clamp(1.55rem, 7vw, 1.8rem);
+      letter-spacing: -0.02em;
+      max-width: 100%;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    .books-proof-hero .lede,
+    .books-path-heading .lede,
+    .proof-points p {
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    .hero-panel p:not(.eyebrow),
+    .lede,
+    .check-list,
+    .item p,
+    .tag,
+    .nav,
+    .book-card-copy,
+    .reading-group,
+    .proof-book-copy,
+    .proof-points,
+    .recipe-card-copy,
+    .ingredient-list {
+      overflow-wrap: anywhere;
+      word-break: break-all;
+    }
+
+    .proof-book-card,
+    .proof-points section {
+      @apply grid-cols-1;
+    }
+
+    .proof-book-cover {
+      @apply min-h-[210px] border-r-0 border-b border-line;
+    }
+
+    .books-path-heading > span {
+      @apply text-4xl;
+    }
+
+    .recipe-card-media,
+    .recipe-detail-media {
+      @apply min-h-[220px];
+    }
+
+    .recipe-step {
+      @apply gap-3;
+      grid-template-columns: 1fr;
+    }
+
+    .recipe-step > span {
+      @apply text-2xl;
+    }
+
+    .hero-metrics,
+    .resume-hero-metrics {
+      @apply gap-0;
+      grid-template-columns: 1fr;
+    }
+
+    .metric,
+    .resume-hero-metrics .metric {
+      @apply border-r-0 border-b border-line py-4;
+    }
+
+    .metric:last-child,
+    .resume-hero-metrics .metric:last-child {
+      @apply border-b-0;
+    }
+
+    .system-map {
+      @apply min-h-[240px];
+    }
+
+    .section-head,
+    .project-item-head,
+    .showcase-panel-header {
       @apply flex-col items-start;
+    }
+
+    .skill-row {
+      @apply grid-cols-1;
+    }
+
+    .project-item {
+      @apply px-4 py-5;
     }
   }
 }

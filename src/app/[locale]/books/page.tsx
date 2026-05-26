@@ -8,50 +8,69 @@ export default async function BooksPage({ params }: { params: Promise<{ locale: 
 
   return (
     <>
-      <header className="article-hero">
-        <p className="eyebrow">{viewModel.dictionary.nav.books}</p>
-        <h1 className="page-title">{viewModel.dictionary.books.title}</h1>
-        <p className="lede">{viewModel.dictionary.books.intro}</p>
+      <header className="article-hero shelf-hero books-proof-hero">
+        <div>
+          <h1 className="page-title">{viewModel.narrative.heroTitle}</h1>
+          <p className="lede">{viewModel.narrative.heroIntro}</p>
+        </div>
+        <aside className="shelf-note books-proof-note">
+          <div className="metric">
+            <span className="eyebrow">{viewModel.narrative.metricLabel}</span>
+            <strong>{viewModel.narrative.metricValue}</strong>
+          </div>
+          <div>
+            <p className="eyebrow">{viewModel.narrative.noteTitle}</p>
+            <p>{viewModel.narrative.noteBody}</p>
+          </div>
+        </aside>
       </header>
 
-      <section className="grid-3">
-        {viewModel.featuredBooks.map((book) => (
-          <article className="panel item" key={book.slug}>
-            {book.coverImage ? <img className="recipe-hero" src={book.coverImage} alt={book.title} /> : null}
-            <p className="eyebrow">{book.category}</p>
-            <h2>{book.title}</h2>
-            <p>{book.summary}</p>
-            <p>
-              <strong>{viewModel.dictionary.books.takeawayLabel}:</strong> {book.takeaway}
-            </p>
+      <section className="section books-path">
+        {viewModel.readingSections.map((section, sectionIndex) => (
+          <article className="books-path-section" key={section.key}>
+            <div className="books-path-heading">
+              <span>{String(sectionIndex + 1).padStart(2, '0')}</span>
+              <div>
+                <p className="eyebrow">{viewModel.narrative.sectionEyebrow}</p>
+                <h2 className="section-title">{section.title}</h2>
+                <p className="lede">{section.description}</p>
+              </div>
+            </div>
+
+            <div className="proof-book-list">
+              {section.books.map((book) => (
+                <article className="proof-book-card" key={book.slug}>
+                  {book.coverImage ? (
+                    <div className="proof-book-cover">
+                      <img src={book.coverImage} alt={book.title} />
+                    </div>
+                  ) : null}
+                  <div className="proof-book-copy">
+                    <div>
+                      <p className="eyebrow">{book.category}</p>
+                      <h3>{book.title}</h3>
+                      {book.author ? <p className="book-author">{book.author}</p> : null}
+                    </div>
+                    <div className="proof-points">
+                      <section>
+                        <strong>{viewModel.narrative.labels.judgment}</strong>
+                        <p>{book.takeaway}</p>
+                      </section>
+                      <section>
+                        <strong>{viewModel.narrative.labels.scene}</strong>
+                        <p>{book.summary}</p>
+                      </section>
+                      <section>
+                        <strong>{viewModel.narrative.labels.proof}</strong>
+                        <p>{book.recommendation}</p>
+                      </section>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
           </article>
         ))}
-      </section>
-
-      <section className="section">
-        <div className="section-head">
-          <div>
-            <p className="eyebrow">{viewModel.dictionary.books.groups}</p>
-            <h2 className="section-title">{viewModel.dictionary.books.groupsTitle}</h2>
-          </div>
-        </div>
-        <div className="grid-2">
-          {viewModel.groupedBooks.map((group) => (
-            <article className="panel" key={group.category}>
-              <p className="eyebrow">{group.category}</p>
-              <h2>{group.title}</h2>
-              <p className="lede">{group.description}</p>
-              <div className="list">
-                {group.books.map((book) => (
-                  <section className="item" key={book.slug}>
-                    <h3>{book.title}</h3>
-                    <p>{book.recommendation}</p>
-                  </section>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
       </section>
     </>
   );

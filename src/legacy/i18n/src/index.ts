@@ -56,7 +56,7 @@ export interface SiteDictionary {
 
 export const dictionaries: Record<Locale, SiteDictionary> = {
   zh: {
-    brand: 'Moon Devfolio',
+    brand: 'Remi Resume',
     tagline: '复杂业务系统、工程交付与产品化实践',
     nav: {
       home: '首页',
@@ -107,10 +107,10 @@ export const dictionaries: Record<Locale, SiteDictionary> = {
       takeawayLabel: '阅读收获',
       recommendationLabel: '推荐理由',
     },
-    footer: 'Moon Devfolio 记录工程实践、架构思考与产品化探索。',
+    footer: 'Remi Resume 记录工程实践、架构思考与产品化探索。',
   },
   en: {
-    brand: 'Moon Devfolio',
+    brand: 'Remi Resume',
     tagline: 'Full-stack engineering, architecture, self-hosting, and AI product work',
     nav: {
       home: 'Home',
@@ -161,7 +161,7 @@ export const dictionaries: Record<Locale, SiteDictionary> = {
       takeawayLabel: 'Reading Takeaways',
       recommendationLabel: 'Why I Recommend It',
     },
-    footer: 'Moon Devfolio documents engineering practice, architecture thinking, and product exploration.',
+    footer: 'Remi Resume documents engineering practice, architecture thinking, and product exploration.',
   },
 };
 
