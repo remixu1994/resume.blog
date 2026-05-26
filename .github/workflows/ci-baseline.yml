@@ -1,0 +1,67 @@
+name: CI Baseline
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  baseline-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+  releaseops-gate:
+    needs: baseline-checks
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    env:
+      RELEASEOPS_MIGRATIONS_CHECKED: ${{ vars.RELEASEOPS_MIGRATIONS_CHECKED }}
+      RELEASEOPS_HEALTHCHECK_URL: ${{ vars.RELEASEOPS_HEALTHCHECK_URL }}
+      RELEASEOPS_HEALTHCHECK_SAMPLES: ${{ vars.RELEASEOPS_HEALTHCHECK_SAMPLES }}
+      RELEASEOPS_HEALTHCHECK_TIMEOUT_MS: ${{ vars.RELEASEOPS_HEALTHCHECK_TIMEOUT_MS }}
+      RELEASEOPS_TEST_COMMAND: npm test
+      RELEASE_ID: gh-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ReleaseOps gate
+        run: npm run releaseops:gate:ci
+
+      - name: Upload rollback notes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: releaseops-rollback-notes-${{ github.run_id }}-${{ github.run_attempt }}
+          path: docs/releaseops/rollback-notes/*.md
+          if-no-files-found: warn
