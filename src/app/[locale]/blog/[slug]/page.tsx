@@ -1,16 +1,15 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getBlogDetailViewModel, getBlogListViewModel } from '@/content/site-content';
+import { connection } from 'next/server';
+import { getBlogDetailViewModel } from '@/content/site-content';
 import { MarkdownBody } from '@/lib/markdown';
-import { locales, requireLocale } from '@/lib/locale';
+import { requireLocale } from '@/lib/locale';
 
-export function generateStaticParams() {
-  return locales.flatMap((locale) =>
-    getBlogListViewModel(locale).items.map((item) => ({ locale, slug: item.slug })),
-  );
-}
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
+  await connection();
   const { locale: localeParam, slug } = await params;
   const locale = requireLocale(localeParam);
   const viewModel = getBlogDetailViewModel(locale, slug);

@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 920" role="img" aria-labelledby="title desc">
+  <title id="title">Grafana Node Exporter dashboard preview</title>
+  <desc id="desc">A dark Grafana-style monitoring dashboard preview with CPU, memory, network, disk, and filesystem panels.</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#171b22"/>
+      <stop offset="1" stop-color="#10141a"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#1ea362"/>
+      <stop offset="1" stop-color="#4ade80"/>
+    </linearGradient>
+    <linearGradient id="yellow" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#b7791f"/>
+      <stop offset="1" stop-color="#facc15"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#b91c1c"/>
+      <stop offset="1" stop-color="#fb7185"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000" flood-opacity=".32"/>
+    </filter>
+  </defs>
+
+  <rect width="1440" height="920" fill="#0b0f14"/>
+  <rect x="0" y="0" width="300" height="920" fill="#151a21"/>
+  <rect x="300" y="0" width="1140" height="58" fill="#0f1319"/>
+  <text x="36" y="36" fill="#f97316" font-family="Segoe UI, sans-serif" font-size="22" font-weight="700">Grafana</text>
+  <text x="336" y="36" fill="#d1d5db" font-family="Segoe UI, sans-serif" font-size="17" font-weight="650">Dashboards › Node Exporter Full</text>
+
+  <g fill="#8b94a7" font-family="Segoe UI, sans-serif" font-size="15">
+    <text x="38" y="86">Home</text>
+    <text x="38" y="124" fill="#e5e7eb">Dashboards</text>
+    <text x="62" y="164">Starred</text>
+    <text x="62" y="202">Playlists</text>
+    <text x="62" y="240">Snapshots</text>
+    <text x="38" y="308">Explore</text>
+    <text x="38" y="346">Alerting</text>
+    <text x="38" y="384">Connections</text>
+  </g>
+  <rect x="32" y="104" width="224" height="36" rx="6" fill="#29313d"/>
+  <rect x="32" y="104" width="4" height="36" fill="#f97316"/>
+
+  <g font-family="Segoe UI, sans-serif">
+    <rect x="324" y="76" width="186" height="34" rx="6" fill="#111720" stroke="#303744"/>
+    <text x="344" y="98" fill="#d1d5db" font-size="13">Datasource</text>
+    <text x="426" y="98" fill="#f3f4f6" font-size="13" font-weight="700">prometheus</text>
+    <rect x="528" y="76" width="164" height="34" rx="6" fill="#111720" stroke="#303744"/>
+    <text x="548" y="98" fill="#d1d5db" font-size="13">Job</text>
+    <text x="590" y="98" fill="#f3f4f6" font-size="13" font-weight="700">unraid-node</text>
+    <rect x="710" y="76" width="210" height="34" rx="6" fill="#111720" stroke="#303744"/>
+    <text x="730" y="98" fill="#d1d5db" font-size="13">Instance</text>
+    <text x="805" y="98" fill="#f3f4f6" font-size="13" font-weight="700">192.168.31.13:9100</text>
+    <rect x="1030" y="76" width="174" height="34" rx="6" fill="#1d4ed8"/>
+    <text x="1072" y="98" fill="#fff" font-size="13" font-weight="700">Share dashboard</text>
+  </g>
+
+  <g transform="translate(324 136)" font-family="Segoe UI, sans-serif">
+    <text x="0" y="0" fill="#d1d5db" font-size="16" font-weight="700">Quick CPU / Mem / Disk</text>
+    <g transform="translate(0 18)">
+      <rect width="128" height="112" rx="8" fill="url(#panel)" stroke="#2e3540"/>
+      <path d="M28 78a42 42 0 0 1 84 0" fill="none" stroke="#29313d" stroke-width="9"/>
+      <path d="M28 78a42 42 0 0 1 67-34" fill="none" stroke="url(#green)" stroke-width="9"/>
+      <text x="24" y="28" fill="#a8b0bf" font-size="13">CPU</text>
+      <text x="48" y="76" fill="#e5e7eb" font-size="20" font-weight="700">2.1%</text>
+    </g>
+    <g transform="translate(150 18)">
+      <rect width="128" height="112" rx="8" fill="url(#panel)" stroke="#2e3540"/>
+      <path d="M28 78a42 42 0 0 1 84 0" fill="none" stroke="#29313d" stroke-width="9"/>
+      <path d="M28 78a42 42 0 0 1 78-22" fill="none" stroke="url(#green)" stroke-width="9"/>
+      <text x="24" y="28" fill="#a8b0bf" font-size="13">Memory</text>
+      <text x="48" y="76" fill="#e5e7eb" font-size="20" font-weight="700">4.2%</text>
+    </g>
+    <g transform="translate(300 18)">
+      <rect width="128" height="112" rx="8" fill="url(#panel)" stroke="#2e3540"/>
+      <path d="M28 78a42 42 0 0 1 84 0" fill="none" stroke="#29313d" stroke-width="9"/>
+      <path d="M28 78a42 42 0 0 1 50-40" fill="none" stroke="url(#yellow)" stroke-width="9"/>
+      <text x="24" y="28" fill="#a8b0bf" font-size="13">Disk</text>
+      <text x="48" y="76" fill="#e5e7eb" font-size="20" font-weight="700">62.6%</text>
+    </g>
+    <g transform="translate(450 18)">
+      <rect width="128" height="112" rx="8" fill="url(#panel)" stroke="#2e3540"/>
+      <path d="M28 78a42 42 0 0 1 84 0" fill="none" stroke="#29313d" stroke-width="9"/>
+      <path d="M28 78a42 42 0 0 1 82-16" fill="none" stroke="url(#red)" stroke-width="9"/>
+      <text x="24" y="28" fill="#a8b0bf" font-size="13">Swap</text>
+      <text x="48" y="76" fill="#e5e7eb" font-size="20" font-weight="700">18.4%</text>
+    </g>
+  </g>
+
+  <g transform="translate(324 306)" filter="url(#shadow)" font-family="Segoe UI, sans-serif">
+    <g>
+      <rect width="500" height="220" rx="8" fill="url(#panel)" stroke="#2e3540"/>
+      <text x="20" y="32" fill="#d1d5db" font-size="16" font-weight="700">CPU Basic</text>
+      <g stroke="#2e3540" stroke-width="1">
+        <line x1="38" y1="58" x2="470" y2="58"/><line x1="38" y1="96" x2="470" y2="96"/><line x1="38" y1="134" x2="470" y2="134"/><line x1="38" y1="172" x2="470" y2="172"/>
+      </g>
+      <path d="M38 174 C110 170 138 176 192 171 C260 164 294 177 358 164 C414 154 436 180 470 169" fill="none" stroke="#facc15" stroke-width="3"/>
+      <path d="M38 176 C120 176 178 174 230 176 C310 178 360 166 470 174" fill="none" stroke="#60a5fa" stroke-width="3"/>
+    </g>
+    <g transform="translate(524 0)">
+      <rect width="500" height="220" rx="8" fill="url(#panel)" stroke="#2e3540"/>
+      <text x="20" y="32" fill="#d1d5db" font-size="16" font-weight="700">Memory Basic</text>
+      <rect x="38" y="70" width="432" height="112" fill="#294f2d" opacity=".75"/>
+      <path d="M38 126 C130 120 200 128 278 122 C350 118 402 126 470 118" fill="none" stroke="#facc15" stroke-width="4"/>
+      <path d="M38 70 L470 70" stroke="#ef4444" stroke-width="3"/>
+    </g>
+    <g transform="translate(0 246)">
+      <rect width="500" height="220" rx="8" fill="url(#panel)" stroke="#2e3540"/>
+      <text x="20" y="32" fill="#d1d5db" font-size="16" font-weight="700">Network Traffic</text>
+      <path d="M38 120 C94 122 130 118 176 120 C214 56 248 186 288 120 C344 126 388 58 430 180 C452 142 462 100 470 118" fill="rgba(250,204,21,.42)" stroke="#facc15" stroke-width="2"/>
+      <path d="M38 121 C116 120 164 124 230 119 C292 120 346 116 470 121" fill="none" stroke="#4ade80" stroke-width="3"/>
+    </g>
+    <g transform="translate(524 246)">
+      <rect width="500" height="220" rx="8" fill="url(#panel)" stroke="#2e3540"/>
+      <text x="20" y="32" fill="#d1d5db" font-size="16" font-weight="700">Disk Space Used</text>
+      <rect x="38" y="80" width="432" height="96" fill="#7c5a15" opacity=".82"/>
+      <rect x="38" y="160" width="432" height="16" fill="#1d4ed8" opacity=".85"/>
+      <path d="M38 80 L470 80" stroke="#f59e0b" stroke-width="3"/>
+      <circle cx="220" cy="112" r="5" fill="#c084fc"/>
+    </g>
+  </g>
+</svg>

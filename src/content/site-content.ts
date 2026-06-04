@@ -6,11 +6,16 @@ import {
   getFeaturedPayload,
   getTopicBySlug,
   resumeProfiles,
-  seedPosts,
 } from '@devfolio-blog/content-data';
 import { dictionaries, normalizeLocale, switchLocale, withLocalePath } from '@devfolio-blog/i18n';
 import { renderMarkdown } from '@devfolio-blog/markdown';
-import type { BookRecommendation, Locale, PublicPost, PublicPostSummary } from '@devfolio-blog/shared-types';
+import type { BookRecommendation, Locale } from '@devfolio-blog/shared-types';
+import {
+  getBlogPost,
+  getBlogSeries,
+  getBlogTopics,
+  listBlogPosts,
+} from '@/lib/blog/repository';
 
 const selectedBookSlugs = [
   'refactoring',
@@ -214,7 +219,7 @@ export function getShellLinks(locale: Locale) {
 }
 
 export function getHomeViewModel(locale: Locale) {
-  const posts = getPublishedPosts(locale);
+  const posts = listBlogPosts(locale);
 
   return {
     dictionary: dictionaries[locale],
@@ -292,7 +297,7 @@ export function getBooksViewModel(locale: Locale) {
 }
 
 export function getBlogListViewModel(locale: Locale) {
-  const items = getPublishedPosts(locale);
+  const items = listBlogPosts(locale);
 
   return {
     dictionary: dictionaries[locale],
@@ -305,67 +310,14 @@ export function getBlogListViewModel(locale: Locale) {
 }
 
 export function getBlogDetailViewModel(locale: Locale, slug: string) {
-  const posts = getPublishedPosts(locale);
-  const item = posts.find((post) => post.slug === slug);
+  const post = getBlogPost(locale, slug);
 
-  return item
+  return post
     ? {
         dictionary: dictionaries[locale],
-        item,
-        html: renderMarkdown(item.body),
-        relatedPosts: getRelatedPosts(item, posts),
+        ...post,
       }
     : null;
-}
-
-
-function getPublishedPosts(locale: Locale): PublicPost[] {
-  return seedPosts
-    .filter((post) => post.locale === locale && post.published)
-    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
-}
-
-function getBlogTopics(posts: PublicPostSummary[]) {
-  const counts = new Map<string, number>();
-
-  for (const post of posts) {
-    for (const tag of post.tags) {
-      counts.set(tag, (counts.get(tag) ?? 0) + 1);
-    }
-  }
-
-  return [...counts.entries()]
-    .map(([name, count]) => ({ name, count }))
-    .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name));
-}
-
-function getBlogSeries(posts: PublicPostSummary[]) {
-  const counts = new Map<string, number>();
-
-  for (const post of posts) {
-    if (post.series) {
-      counts.set(post.series, (counts.get(post.series) ?? 0) + 1);
-    }
-  }
-
-  return [...counts.entries()]
-    .map(([name, count]) => ({ name, count }))
-    .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name));
-}
-
-function getRelatedPosts(item: PublicPostSummary, posts: PublicPostSummary[]) {
-  return posts
-    .filter((post) => post.id !== item.id)
-    .map((post) => ({
-      post,
-      score:
-        (item.series && post.series === item.series ? 10 : 0) +
-        post.tags.filter((tag) => item.tags.includes(tag)).length,
-    }))
-    .filter(({ score }) => score > 0)
-    .sort((left, right) => right.score - left.score || right.post.updatedAt.localeCompare(left.post.updatedAt))
-    .slice(0, 3)
-    .map(({ post }) => post);
 }
 
 function getBooksHomeViewModel(locale: Locale) {

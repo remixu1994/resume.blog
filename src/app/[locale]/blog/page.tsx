@@ -1,8 +1,13 @@
+import { connection } from 'next/server';
 import { PostCard } from '@/components/cards';
 import { getBlogListViewModel } from '@/content/site-content';
 import { requireLocale } from '@/lib/locale';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function BlogPage({ params }: { params: Promise<{ locale: string }> }) {
+  await connection();
   const { locale: localeParam } = await params;
   const locale = requireLocale(localeParam);
   const viewModel = getBlogListViewModel(locale);
