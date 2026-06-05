@@ -212,7 +212,6 @@ export function getShellLinks(locale: Locale) {
     { label: dictionaries[locale].nav.home, href: withLocalePath(locale) },
     { label: dictionaries[locale].nav.resume, href: withLocalePath(locale, 'resume') },
     { label: dictionaries[locale].nav.books, href: withLocalePath(locale, 'books') },
-    { label: dictionaries[locale].nav.fitness, href: withLocalePath(locale, 'fitness') },
     { label: dictionaries[locale].nav.recipes, href: withLocalePath(locale, 'recipes') },
     { label: dictionaries[locale].nav.blog, href: withLocalePath(locale, 'blog') },
   ];

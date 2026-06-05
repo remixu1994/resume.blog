@@ -4,16 +4,16 @@
 
 @layer base {
   :root {
-    --bg: #f5f7f6;
+    --bg: #f6f8f7;
     --paper: #ffffff;
     --ink: #101514;
     --muted: #5f6a67;
-    --line: rgba(16, 21, 20, 0.12);
+    --line: rgba(16, 21, 20, 0.1);
     --accent: #075f52;
     --accent-strong: #043d35;
     --accent-soft: #e2f0ed;
     --warm: #b75b36;
-    --shadow: 0 20px 60px rgba(16, 21, 20, 0.08);
+    --shadow: 0 18px 48px rgba(16, 21, 20, 0.07);
     --display: Georgia, "Times New Roman", "Noto Serif SC", "Songti SC", serif;
     --sans: "Aptos", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     --mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
@@ -25,11 +25,7 @@
 
   body {
     @apply m-0 bg-bg font-sans text-ink;
-    background:
-      linear-gradient(90deg, rgba(7, 95, 82, 0.045) 1px, transparent 1px),
-      linear-gradient(180deg, rgba(7, 95, 82, 0.035) 1px, transparent 1px),
-      linear-gradient(180deg, #ffffff 0%, var(--bg) 46%, #eef3f1 100%);
-    background-size: 56px 56px, 56px 56px, auto;
+    background: linear-gradient(180deg, #fbfcfb 0%, var(--bg) 40%, #eef4f1 100%);
     overflow-x: hidden;
   }
 
@@ -118,8 +114,8 @@
 
   .hero {
     @apply grid overflow-hidden rounded-lg border border-line bg-paper shadow-editorial;
-    min-height: 560px;
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 0.48fr);
+    min-height: 600px;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.46fr);
   }
 
   .hero-panel {
@@ -137,7 +133,7 @@
 
   .hero-panel h1 {
     @apply max-w-[760px];
-    font-size: clamp(3.5rem, 7vw, 6.8rem);
+    font-size: clamp(3.4rem, 6.6vw, 6.4rem);
     line-height: 0.95;
     overflow-wrap: anywhere;
   }
@@ -225,8 +221,57 @@
   }
 
   .hero-side {
-    @apply border-l border-line bg-[#fbfcfb] p-8;
+    @apply border-l border-line p-8;
+    background:
+      linear-gradient(180deg, rgba(226, 240, 237, 0.58), rgba(255, 255, 255, 0.92)),
+      #fbfcfb;
     grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .profile-card {
+    @apply relative grid min-h-[360px] overflow-hidden rounded-md border border-line bg-ink p-7 text-white;
+    align-content: space-between;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+
+  .profile-card::before {
+    content: "";
+    @apply absolute inset-x-0 top-0 h-1;
+    background: linear-gradient(90deg, var(--accent), var(--warm));
+  }
+
+  .profile-card .eyebrow {
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  .profile-card h2 {
+    @apply m-0 mt-6 font-display text-[2rem] font-semibold leading-tight;
+    overflow-wrap: anywhere;
+  }
+
+  .focus-list {
+    @apply grid gap-2;
+  }
+
+  .focus-list span {
+    @apply rounded border px-3 py-2 text-[0.86rem] font-semibold;
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.055);
+  }
+
+  .latest-note {
+    @apply block rounded-md border p-4 transition;
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .latest-note:hover {
+    background: rgba(255, 255, 255, 0.13);
+    transform: translateY(-1px);
+  }
+
+  .latest-note strong {
+    @apply mt-2 block text-[1.04rem] leading-snug;
   }
 
   .system-map {
@@ -427,20 +472,31 @@
 
   .resume-hero {
     @apply grid gap-10 rounded-lg border border-line bg-paper p-10 shadow-editorial;
-    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.34fr);
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.32fr);
   }
 
   .resume-hero-copy {
-    @apply max-w-[850px];
+    @apply max-w-[900px];
     min-width: 0;
   }
 
+  .resume-title {
+    @apply m-0 font-display font-semibold tracking-normal;
+    font-size: clamp(3rem, 6vw, 4.9rem);
+    line-height: 0.98;
+    overflow-wrap: anywhere;
+  }
+
+  .resume-headline {
+    @apply mb-0 mt-5 max-w-[840px] text-[1.08rem] font-semibold leading-[1.75] text-[#26302e];
+  }
+
   .resume-hero-copy .lede {
-    @apply max-w-[760px];
+    @apply max-w-[820px];
   }
 
   .resume-hero-metrics {
-    @apply border-t-0 border-l border-line pl-8;
+    @apply grid border-l border-line pl-8;
     grid-template-columns: 1fr;
   }
 
@@ -452,14 +508,20 @@
     @apply border-b-0;
   }
 
-  .resume-scan-grid {
+  .resume-overview,
+  .resume-section,
+  .resume-info-grid {
+    @apply rounded-lg border border-line bg-paper shadow-editorial;
+  }
+
+  .resume-overview {
     @apply mt-8 grid rounded-lg border border-line bg-paper shadow-editorial;
     grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1fr);
   }
 
   .summary-panel,
   .skill-panel {
-    @apply rounded-none border-0 bg-transparent;
+    @apply p-8;
     min-width: 0;
   }
 
@@ -480,49 +542,139 @@
     @apply absolute left-0 top-0 font-bold text-accent;
   }
 
+  .check-list li::before {
+    content: "\2713";
+  }
+
   .skill-grid {
     @apply grid gap-5;
   }
 
   .skill-row {
     @apply grid gap-3 border-t border-line pt-4;
-    grid-template-columns: minmax(120px, 0.26fr) minmax(0, 1fr);
+    grid-template-columns: minmax(128px, 0.28fr) minmax(0, 1fr);
   }
 
   .skill-row:first-child {
     @apply border-t-0 pt-0;
   }
 
+  .skill-row h2,
   .skill-row h3 {
     @apply m-0 text-[1rem] leading-snug;
   }
 
-  .resume-content-grid {
-    grid-template-columns: minmax(0, 1fr) 320px;
+  .resume-section {
+    @apply p-8;
+  }
+
+  .resume-section-head {
+    @apply mb-6 border-b border-line pb-5;
+  }
+
+  .resume-project-list {
+    @apply grid gap-4;
+  }
+
+  .resume-project-card {
+    @apply rounded-md border border-line bg-white px-6 py-6;
+  }
+
+  .resume-project-head {
+    @apply mb-3 flex items-start justify-between gap-5;
+  }
+
+  .resume-project-head h3,
+  .experience-item h3,
+  .resume-info-item h2 {
+    @apply m-0 text-[1.3rem] leading-snug;
+  }
+
+  .resume-project-summary,
+  .experience-item p,
+  .resume-info-item p {
+    @apply leading-[1.75] text-muted;
+    overflow-wrap: anywhere;
+  }
+
+  .resume-project-stack {
+    @apply mb-5 mt-4 flex flex-wrap gap-2.5;
+  }
+
+  .resume-contribution-label {
+    @apply mb-3 mt-0;
+  }
+
+  .resume-contribution-list,
+  .experience-item ul {
+    @apply m-0 grid gap-2.5 pl-5 text-[0.96rem] leading-[1.7] text-[#273331];
+  }
+
+  .resume-project-card .showcase-entry {
+    @apply m-0 border-0 p-0;
+  }
+
+  .resume-project-card .button {
+    @apply min-h-10 min-w-[116px] whitespace-nowrap border-line bg-white px-4 text-accent-strong shadow-none;
+  }
+
+  .resume-project-card .button:hover {
+    @apply border-accent bg-accent-soft text-accent-strong;
+  }
+
+  .experience-timeline {
+    @apply grid gap-0;
+  }
+
+  .experience-item {
+    @apply relative grid gap-5 border-b border-line py-6 pl-8;
+    grid-template-columns: 18px minmax(0, 1fr);
+  }
+
+  .experience-item:first-child {
+    @apply pt-0;
+  }
+
+  .experience-item:last-child {
+    @apply border-b-0 pb-0;
+  }
+
+  .experience-item::before {
+    content: "";
+    @apply absolute bottom-0 left-[16px] top-6 w-px bg-line;
+  }
+
+  .experience-item:last-child::before {
+    @apply hidden;
+  }
+
+  .experience-marker {
+    @apply relative z-[1] mt-1 h-3 w-3 rounded-full border-2 border-accent bg-white;
+  }
+
+  .experience-company {
+    @apply mb-2 mt-1 font-semibold text-ink;
+  }
+
+  .resume-info-grid {
+    @apply grid gap-0 p-0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .resume-info-grid .panel {
+    @apply rounded-none border-0 border-r border-line bg-transparent shadow-none;
+  }
+
+  .resume-info-grid .panel:last-child {
+    @apply border-r-0;
   }
 
   .profile-panel p:not(.eyebrow) {
     @apply mb-2 mt-0 font-bold;
   }
 
-  .project-item {
-    @apply rounded-md border border-line px-6 py-6;
-  }
-
-  .project-item + .project-item {
-    @apply mt-5;
-  }
-
-  .project-item-head {
-    @apply mb-4 flex items-start justify-between gap-5;
-  }
-
-  .project-item .showcase-entry {
-    @apply m-0 border-0 p-0;
-  }
-
-  .project-item .button {
-    @apply min-w-[118px] whitespace-nowrap;
+  .resume-info-item + .resume-info-item {
+    @apply mt-5 border-t border-line pt-5;
   }
 
   .markdown-body {
@@ -1087,7 +1239,8 @@
     .hero,
     .home-content-grid,
     .resume-hero,
-    .resume-scan-grid,
+    .resume-overview,
+    .resume-info-grid,
     .shelf-hero,
     .books-proof-hero,
     .books-path-section,
@@ -1107,6 +1260,7 @@
     .topic-rail,
     .summary-panel,
     .resume-hero-metrics,
+    .resume-info-grid .panel,
     .recipe-card-media {
       @apply border-l-0;
     }
@@ -1130,6 +1284,14 @@
 
     .summary-panel {
       @apply border-r-0 border-b border-line;
+    }
+
+    .resume-info-grid .panel {
+      @apply border-r-0 border-b border-line;
+    }
+
+    .resume-info-grid .panel:last-child {
+      @apply border-b-0;
     }
 
     .resume-hero-metrics {
@@ -1183,7 +1345,9 @@
     .section-band,
     .home-content-grid,
     .resume-hero,
-    .resume-scan-grid,
+    .resume-overview,
+    .resume-section,
+    .resume-info-grid,
     .shelf-hero,
     .books-proof-hero,
     .recipe-index-hero,
@@ -1202,6 +1366,9 @@
     .resume-hero,
     .summary-panel,
     .skill-panel,
+    .resume-section,
+    .resume-project-card,
+    .resume-info-grid .panel,
     .shelf-hero,
     .books-proof-hero,
     .books-path-section,
@@ -1214,7 +1381,8 @@
     }
 
     .hero-panel h1,
-    .page-title {
+    .page-title,
+    .resume-title {
       font-size: clamp(2.3rem, 11vw, 3.05rem);
       line-height: 1;
       word-break: break-all;
@@ -1300,7 +1468,7 @@
     }
 
     .section-head,
-    .project-item-head,
+    .resume-project-head,
     .showcase-panel-header {
       @apply flex-col items-start;
     }
@@ -1309,8 +1477,17 @@
       @apply grid-cols-1;
     }
 
-    .project-item {
+    .resume-project-card {
       @apply px-4 py-5;
+    }
+
+    .experience-item {
+      @apply gap-3 pl-4;
+      grid-template-columns: 14px minmax(0, 1fr);
+    }
+
+    .experience-item::before {
+      @apply left-[6px];
     }
   }
 }
