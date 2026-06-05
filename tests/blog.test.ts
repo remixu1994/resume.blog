@@ -57,7 +57,7 @@ Markdown content.`);
 
     const posts = readSqliteBlogPosts(dbPath);
 
-    expect(posts).toHaveLength(2);
+    expect(posts).toHaveLength(1);
     expect(posts[0]).toMatchObject({
       id: 'sqlite-1',
       slug: 'sqlite-post',
@@ -70,6 +70,14 @@ Markdown content.`);
       status: 'published',
       source: 'sqlite',
     });
+  });
+
+  it('does not validate hidden sqlite drafts during public reads', () => {
+    const dbPath = createBlogDatabase({ includeMalformedDraft: true });
+
+    const posts = readSqliteBlogPosts(dbPath);
+
+    expect(posts.map((post) => post.slug)).toEqual(['sqlite-post']);
   });
 
   it('lets sqlite override markdown for the same locale and slug', () => {
@@ -131,7 +139,7 @@ Markdown content.`);
   });
 });
 
-function createBlogDatabase() {
+function createBlogDatabase(options: { includeMalformedDraft?: boolean } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'resume-blog-'));
   tempDirs.push(dir);
   const dbPath = join(dir, 'blog.sqlite');
@@ -191,6 +199,22 @@ function createBlogDatabase() {
     series: null,
     body: '## Draft body',
   });
+  if (options.includeMalformedDraft) {
+    insert.run({
+      id: 'sqlite-bad-draft',
+      slug: 'sqlite-bad-draft',
+      locale: 'zh',
+      title: 'Bad Draft',
+      summary: 'Hidden malformed row.',
+      heroImage: '/assets/blog/unraid-layout.svg',
+      updatedAt: '2026-05-23',
+      tagsJson: '{not-json',
+      published: 0,
+      status: 'draft',
+      series: null,
+      body: '',
+    });
+  }
 
   db.close();
   return dbPath;

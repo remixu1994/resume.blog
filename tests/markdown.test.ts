@@ -45,4 +45,12 @@ title: Hidden metadata
     expect(html).not.toContain('Hidden metadata');
     expect(html).toContain('<h2>Visible title</h2>');
   });
+
+  it('strips CRLF-delimited frontmatter before rendering', () => {
+    const html = renderMarkdown('---\r\ntitle: Hidden metadata\r\n---\r\n\r\n## Visible title');
+
+    expect(html).not.toContain('Hidden metadata');
+    expect(html).not.toContain('title:');
+    expect(html).toContain('<h2>Visible title</h2>');
+  });
 });

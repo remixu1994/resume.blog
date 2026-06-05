@@ -35,7 +35,9 @@ export function readSqliteBlogPosts(dbPath = getBlogDatabasePath()): BlogPost[] 
                 status,
                 series,
                 body
-           from blog_posts`,
+           from blog_posts
+          where published = 1
+            and status = 'published'`,
       )
       .all();
 

@@ -1,10 +1,13 @@
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { ArchitectureCard, PostCard, TopicCard } from '@/components/cards';
 import { getHomeViewModel } from '@/content/site-content';
 import { requireLocale } from '@/lib/locale';
+
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  await connection();
   const { locale: localeParam } = await params;
   const locale = requireLocale(localeParam);
   const viewModel = getHomeViewModel(locale);

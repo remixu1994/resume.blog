@@ -34,10 +34,8 @@ export function renderMarkdown(markdown: string): string {
 }
 
 function normalizeMarkdown(markdown: string): string {
-  return stripFrontmatter(markdown)
-    .replace(/^\uFEFF/, '')
-    .replace(/\r\n?/g, '\n')
-    .trim();
+  const normalized = markdown.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+  return stripFrontmatter(normalized).trim();
 }
 
 function stripFrontmatter(markdown: string): string {
