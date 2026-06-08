@@ -2,6 +2,7 @@
 id: unraid-cadvisor-grafana-dashboard
 slug: unraid-cadvisor-grafana-dashboard
 locale: zh
+category: unraid-nas
 title: 使用 cAdvisor 和 Grafana 在 Unraid 上构建容器监控 Dashboard
 summary: 分享如何在 Unraid 环境下使用 cAdvisor 采集 Docker 和虚拟机指标，并通过 Grafana 构建可视化 Dashboard，包括版本选择、Prometheus 查询与最佳实践。
 heroImage: /assets/blog/unraid-layout.svg

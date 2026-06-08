@@ -4,8 +4,10 @@ import { join } from 'node:path';
 import Database from 'better-sqlite3';
 import { afterEach, describe, expect, it } from 'vitest';
 import { parseBlogMarkdown } from '@/lib/blog/markdown-source';
+import { getBlogListViewModel } from '@/content/site-content';
 import {
   getBlogPost,
+  getBlogCategories,
   listBlogPosts,
   mergeBlogSources,
 } from '@/lib/blog/repository';
@@ -45,6 +47,7 @@ Markdown content.`);
       slug: 'md-post',
       locale: 'zh',
       title: 'Markdown Post',
+      category: 'uncategorized',
       tags: ['Markdown', 'Blog'],
       source: 'md',
       series: 'static-notes',
@@ -63,6 +66,7 @@ Markdown content.`);
       slug: 'sqlite-post',
       locale: 'zh',
       title: 'SQLite Post',
+      category: 'sqlite-notes',
       heroImage: '/assets/blog/unraid-layout.svg',
       updatedAt: '2026-05-21',
       tags: ['SQLite', 'Runtime'],
@@ -78,6 +82,7 @@ Markdown content.`);
     const posts = readSqliteBlogPosts(dbPath);
 
     expect(posts.map((post) => post.slug)).toEqual(['sqlite-post']);
+    expect(posts[0].category).toBe('sqlite-notes');
   });
 
   it('lets sqlite override markdown for the same locale and slug', () => {
@@ -137,10 +142,92 @@ Markdown content.`);
 
     expect(detail).toBeNull();
   });
+
+  it('resolves legacy Chinese blog slugs to canonical English slugs', () => {
+    const detail = getBlogPost('zh', '什么是架构-顶层设计-模块-组件与三大原则', [
+      sourceWithPosts([
+        blogPost({
+          slug: 'what-is-architecture-top-level-design-modules-components-and-three-principles',
+          title: 'Chinese slug redirect target',
+        }),
+      ]),
+    ]);
+
+    expect(detail?.item.slug).toBe('what-is-architecture-top-level-design-modules-components-and-three-principles');
+    expect(detail?.item.title).toBe('Chinese slug redirect target');
+  });
+
+  it('resolves encoded detail slugs', () => {
+    const slug = 'what-is-architecture-top-level-design-modules-components-and-three-principles';
+    const detail = getBlogPost('zh', encodeURIComponent(slug), [
+      sourceWithPosts([
+        blogPost({
+          slug,
+          title: 'English slug post',
+        }),
+      ]),
+    ]);
+
+    expect(detail?.item.slug).toBe(slug);
+    expect(detail?.item.title).toBe('English slug post');
+  });
+
+  it('derives blog categories from public posts', () => {
+    const posts = [
+      blogPost({ slug: 'one', category: 'architecture' }),
+      blogPost({ slug: 'two', category: 'architecture' }),
+      blogPost({ slug: 'three', category: 'extreme-programming' }),
+    ];
+
+    expect(getBlogCategories(posts).map((item) => item.name)).toEqual(['architecture', 'extreme-programming']);
+  });
+
+  it('imports the draft folders into sqlite with categories', async () => {
+    // @ts-expect-error - the import script is a runtime-only helper.
+    const { importBlogDraftsIntoSqlite } = await import('../scripts/import-blog-md-to-sqlite.mjs');
+    const dir = createTempDatabasePath();
+    tempDirs.push(dir);
+    const dbPath = join(dir, 'blog.sqlite');
+
+    const result = importBlogDraftsIntoSqlite({ dbPath });
+    const posts = readSqliteBlogPosts(dbPath);
+
+    expect(result.importedCount).toBe(15);
+    expect(posts).toHaveLength(15);
+    expect(new Set(posts.map((post) => post.category))).toEqual(
+      new Set(['microservices-ddd', 'extreme-programming', 'architecture', 'fundamentals']),
+    );
+  });
+
+  it('filters the blog list by category', async () => {
+    // @ts-expect-error - the import script is a runtime-only helper.
+    const { importBlogDraftsIntoSqlite } = await import('../scripts/import-blog-md-to-sqlite.mjs');
+    const dir = createTempDatabasePath();
+    tempDirs.push(dir);
+    const dbPath = join(dir, 'blog.sqlite');
+    const previousDbPath = process.env.BLOG_DB_PATH;
+
+    try {
+      importBlogDraftsIntoSqlite({ dbPath });
+      process.env.BLOG_DB_PATH = dbPath;
+
+      const viewModel = getBlogListViewModel('zh', 'architecture');
+
+      expect(viewModel.items.length).toBeGreaterThan(0);
+      expect(viewModel.items.every((post) => post.category === 'architecture')).toBe(true);
+      expect(viewModel.categories.some((item) => item.active && item.slug === 'architecture')).toBe(true);
+    } finally {
+      if (previousDbPath === undefined) {
+        delete process.env.BLOG_DB_PATH;
+      } else {
+        process.env.BLOG_DB_PATH = previousDbPath;
+      }
+    }
+  });
 });
 
 function createBlogDatabase(options: { includeMalformedDraft?: boolean } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'resume-blog-'));
+  const dir = createTempDatabasePath();
   tempDirs.push(dir);
   const dbPath = join(dir, 'blog.sqlite');
   const db = new Database(dbPath);
@@ -152,6 +239,7 @@ function createBlogDatabase(options: { includeMalformedDraft?: boolean } = {}) {
       locale text not null,
       title text not null,
       summary text not null,
+      category text not null,
       hero_image text not null,
       updated_at text not null,
       tags_json text not null,
@@ -165,9 +253,9 @@ function createBlogDatabase(options: { includeMalformedDraft?: boolean } = {}) {
 
   const insert = db.prepare(`
     insert into blog_posts (
-      id, slug, locale, title, summary, hero_image, updated_at, tags_json, published, status, series, body
+      id, slug, locale, title, summary, category, hero_image, updated_at, tags_json, published, status, series, body
     ) values (
-      @id, @slug, @locale, @title, @summary, @heroImage, @updatedAt, @tagsJson, @published, @status, @series, @body
+      @id, @slug, @locale, @title, @summary, @category, @heroImage, @updatedAt, @tagsJson, @published, @status, @series, @body
     )
   `);
 
@@ -177,6 +265,7 @@ function createBlogDatabase(options: { includeMalformedDraft?: boolean } = {}) {
     locale: 'zh',
     title: 'SQLite Post',
     summary: 'Loaded at runtime.',
+    category: 'sqlite-notes',
     heroImage: '/assets/blog/unraid-layout.svg',
     updatedAt: '2026-05-21',
     tagsJson: JSON.stringify(['SQLite', 'Runtime']),
@@ -191,6 +280,7 @@ function createBlogDatabase(options: { includeMalformedDraft?: boolean } = {}) {
     locale: 'zh',
     title: 'SQLite Draft',
     summary: 'Draft row.',
+    category: 'draft-notes',
     heroImage: '/assets/blog/unraid-layout.svg',
     updatedAt: '2026-05-22',
     tagsJson: JSON.stringify(['SQLite']),
@@ -206,6 +296,7 @@ function createBlogDatabase(options: { includeMalformedDraft?: boolean } = {}) {
       locale: 'zh',
       title: 'Bad Draft',
       summary: 'Hidden malformed row.',
+      category: 'broken',
       heroImage: '/assets/blog/unraid-layout.svg',
       updatedAt: '2026-05-23',
       tagsJson: '{not-json',
@@ -218,6 +309,10 @@ function createBlogDatabase(options: { includeMalformedDraft?: boolean } = {}) {
 
   db.close();
   return dbPath;
+}
+
+function createTempDatabasePath() {
+  return mkdtempSync(join(tmpdir(), 'resume-blog-'));
 }
 
 function sourceWithPosts(posts: BlogPost[]): BlogContentSource {
@@ -233,6 +328,7 @@ function blogPost(overrides: Partial<BlogPost> = {}): BlogPost {
     locale: 'zh',
     title: 'Post',
     summary: 'Summary',
+    category: 'uncategorized',
     heroImage: '/assets/blog/unraid-layout.svg',
     updatedAt: '2026-05-01',
     tags: ['Blog'],

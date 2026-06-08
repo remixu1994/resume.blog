@@ -70,7 +70,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               ))}
             </div>
             {latestPost ? (
-              <Link className="latest-note" href={`/${locale}/blog/${latestPost.slug}`}>
+              <Link className="latest-note" href={`/${locale}/blog/${encodeURIComponent(latestPost.slug)}`}>
                 <span className="eyebrow">{isZh ? '最新文章' : 'Latest Post'}</span>
                 <strong>{latestPost.title}</strong>
               </Link>

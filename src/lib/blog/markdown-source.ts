@@ -25,7 +25,8 @@ export function readMarkdownBlogPosts(rootDir = join(process.cwd(), DEFAULT_BLOG
 }
 
 export function parseBlogMarkdown(markdown: string): BlogPost {
-  const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(markdown);
+  const normalized = normalizeMarkdown(markdown);
+  const match = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(normalized);
   if (!match) {
     throw new Error('Blog markdown must start with frontmatter delimited by ---');
   }
@@ -35,12 +36,28 @@ export function parseBlogMarkdown(markdown: string): BlogPost {
   return blogPostSchema.parse({ ...raw, body: body.trim(), source: 'md' });
 }
 
+function normalizeMarkdown(markdown: string) {
+  return markdown.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+}
+
 function parseFrontmatter(frontmatter: string): Record<string, unknown> {
   const result: Record<string, unknown> = {};
+  let currentKey: string | null = null;
 
   for (const line of frontmatter.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
+
+    if (trimmed.startsWith('- ')) {
+      if (!currentKey) {
+        throw new Error(`Invalid blog frontmatter line: ${line}`);
+      }
+
+      const item = parseFrontmatterValue(trimmed.slice(2).trim());
+      const previous = result[currentKey];
+      result[currentKey] = Array.isArray(previous) ? [...previous, item] : [previous, item].filter(Boolean);
+      continue;
+    }
 
     const separator = trimmed.indexOf(':');
     if (separator === -1) {
@@ -49,7 +66,9 @@ function parseFrontmatter(frontmatter: string): Record<string, unknown> {
 
     const key = trimmed.slice(0, separator).trim();
     const value = trimmed.slice(separator + 1).trim();
-    result[key] = parseFrontmatterValue(value);
+    const parsedValue = parseFrontmatterValue(value);
+    result[key] = parsedValue;
+    currentKey = key;
   }
 
   return result;

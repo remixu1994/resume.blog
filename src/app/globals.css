@@ -466,6 +466,30 @@
     @apply mb-8 border-b border-line pb-10;
   }
 
+  .blog-filter-bar {
+    @apply mb-8 flex flex-wrap gap-3;
+  }
+
+  .blog-filter {
+    @apply inline-flex min-h-10 items-center gap-3 rounded-md border border-line bg-white px-4 py-2 text-[0.88rem] font-semibold text-muted transition;
+  }
+
+  .blog-filter strong {
+    @apply rounded bg-accent-soft px-2 py-0.5 text-[0.74rem] font-bold text-accent-strong;
+  }
+
+  .blog-filter:hover {
+    @apply border-accent bg-accent-soft text-accent-strong;
+  }
+
+  .blog-filter.is-active {
+    @apply border-accent bg-accent text-white;
+  }
+
+  .blog-filter.is-active strong {
+    @apply bg-white/15 text-white;
+  }
+
   .article-meta {
     @apply font-mono text-[0.75rem] tracking-[0.08em] text-muted;
   }

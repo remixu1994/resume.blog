@@ -8,6 +8,7 @@ export interface BlogPost {
   locale: Locale;
   title: string;
   summary: string;
+  category: string;
   heroImage: string;
   updatedAt: string;
   tags: string[];
@@ -22,6 +23,7 @@ export type BlogPostSummary = Omit<BlogPost, 'body'>;
 
 export interface BlogPostQuery {
   locale: Locale;
+  category?: string;
 }
 
 export interface BlogContentSource {

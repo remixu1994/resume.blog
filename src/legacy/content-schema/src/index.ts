@@ -36,6 +36,7 @@ export const topicShowcaseSchema = staticContentFrontmatterSchema.extend({
 
 export const postSchema = staticContentFrontmatterSchema.extend({
   id: z.string().min(1),
+  category: z.string().min(1),
   body: z.string().min(1),
   status: z.enum(['draft', 'published']),
   series: z.string().optional(),

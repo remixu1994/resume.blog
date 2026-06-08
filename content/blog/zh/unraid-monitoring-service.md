@@ -2,6 +2,7 @@
 id: unraid-monitoring-service
 slug: unraid-monitoring-service
 locale: zh
+category: unraid-nas
 title: 从一次 Unraid 卡死说起：构建 NAS 服务监控与告警体系
 summary: 记录一次 Unraid NAS 卡死后的排查过程，并搭建 Prometheus、Node Exporter、cAdvisor、Grafana 与 Uptime Kuma 监控告警体系。
 heroImage: /assets/blog/unraid-layout.svg

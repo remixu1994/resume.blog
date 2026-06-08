@@ -2,6 +2,7 @@
 id: hermes-application-scenarios
 slug: hermes-application-scenarios
 locale: zh
+category: unraid-nas
 title: 我的 Hermes 应用场景分享
 summary: 记录 Hermes 作为私人助理在生活提醒、游戏情报、技术资讯和智能家居中的实际使用场景。
 heroImage: /assets/blog/fitness-loop.svg
