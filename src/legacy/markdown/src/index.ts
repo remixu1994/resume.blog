@@ -18,6 +18,12 @@ const markdownParser = new Marked({
       const escapedCode = escapeHtml(text);
       const escapedLanguage = escapeHtml(language);
 
+      if (language === 'mermaid') {
+        return `<figure class="mermaid-block" data-mermaid-block>
+  <pre class="mermaid" data-mermaid>${escapedCode}</pre>
+</figure>`;
+      }
+
       return `<figure class="code-block" data-code-block>
   <figcaption class="code-block-header">
     <span class="code-block-language">${escapedLanguage}</span>

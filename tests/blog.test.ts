@@ -62,7 +62,7 @@ Markdown content.`);
 
     expect(posts).toHaveLength(1);
     expect(posts[0]).toMatchObject({
-      id: 'sqlite-1',
+      id: 'sqlite-group:zh',
       slug: 'sqlite-post',
       locale: 'zh',
       title: 'SQLite Post',
@@ -70,6 +70,7 @@ Markdown content.`);
       heroImage: '/assets/blog/unraid-layout.svg',
       updatedAt: '2026-05-21',
       tags: ['SQLite', 'Runtime'],
+      tagIds: ['sqlite', 'runtime'],
       published: true,
       status: 'published',
       source: 'sqlite',
@@ -83,6 +84,15 @@ Markdown content.`);
 
     expect(posts.map((post) => post.slug)).toEqual(['sqlite-post']);
     expect(posts[0].category).toBe('sqlite-notes');
+  });
+
+  it('projects sqlite multilingual rows by available locale fields', () => {
+    const dbPath = createBlogDatabase({ includeEnglish: true });
+
+    expect(readSqliteBlogPosts(dbPath).map((post) => `${post.locale}:${post.slug}`)).toEqual([
+      'zh:sqlite-post',
+      'en:sqlite-post-en',
+    ]);
   });
 
   it('lets sqlite override markdown for the same locale and slug', () => {
@@ -194,9 +204,36 @@ Markdown content.`);
 
     expect(result.importedCount).toBe(15);
     expect(posts).toHaveLength(15);
+    expect(posts.every((post) => post.locale === 'zh')).toBe(true);
     expect(new Set(posts.map((post) => post.category))).toEqual(
       new Set(['microservices-ddd', 'extreme-programming', 'architecture', 'fundamentals']),
     );
+    expect(posts.every((post) => !post.body.includes('## 原始来源'))).toBe(true);
+  });
+
+  it('strips source reference sections from imported markdown bodies', async () => {
+    // @ts-expect-error - the import script is a runtime-only helper.
+    const { stripSourceReferences } = await import('../scripts/import-blog-md-to-sqlite.mjs');
+
+    const body = stripSourceReferences(`# Title
+
+Main content.
+
+## 原始来源
+
+- \`../note.md\`
+- https://example.com
+
+## Next section
+
+Keep this section.`);
+
+    expect(body).toContain('Main content.');
+    expect(body).toContain('## Next section');
+    expect(body).toContain('Keep this section.');
+    expect(body).not.toContain('原始来源');
+    expect(body).not.toContain('../note.md');
+    expect(body).not.toContain('https://example.com');
   });
 
   it('filters the blog list by category', async () => {
@@ -226,7 +263,7 @@ Markdown content.`);
   });
 });
 
-function createBlogDatabase(options: { includeMalformedDraft?: boolean } = {}) {
+function createBlogDatabase(options: { includeMalformedDraft?: boolean; includeEnglish?: boolean } = {}) {
   const dir = createTempDatabasePath();
   tempDirs.push(dir);
   const dbPath = join(dir, 'blog.sqlite');
@@ -235,75 +272,94 @@ function createBlogDatabase(options: { includeMalformedDraft?: boolean } = {}) {
   db.exec(`
     create table blog_posts (
       id text primary key,
-      slug text not null,
-      locale text not null,
-      title text not null,
-      summary text not null,
+      group_id text not null unique,
       category text not null,
       hero_image text not null,
       updated_at text not null,
-      tags_json text not null,
+      tag_ids_json text not null,
       published integer not null,
       status text not null,
       series text,
-      body text not null
+      slug_zh text,
+      title_zh text,
+      summary_zh text,
+      body_zh text,
+      slug_en text,
+      title_en text,
+      summary_en text,
+      body_en text
     );
-    create unique index blog_posts_locale_slug_idx on blog_posts(locale, slug);
+    create unique index blog_posts_slug_zh_idx on blog_posts(slug_zh) where slug_zh is not null;
+    create unique index blog_posts_slug_en_idx on blog_posts(slug_en) where slug_en is not null;
   `);
 
   const insert = db.prepare(`
     insert into blog_posts (
-      id, slug, locale, title, summary, category, hero_image, updated_at, tags_json, published, status, series, body
+      id, group_id, category, hero_image, updated_at, tag_ids_json, published, status, series,
+      slug_zh, title_zh, summary_zh, body_zh, slug_en, title_en, summary_en, body_en
     ) values (
-      @id, @slug, @locale, @title, @summary, @category, @heroImage, @updatedAt, @tagsJson, @published, @status, @series, @body
+      @id, @groupId, @category, @heroImage, @updatedAt, @tagIdsJson, @published, @status, @series,
+      @slugZh, @titleZh, @summaryZh, @bodyZh, @slugEn, @titleEn, @summaryEn, @bodyEn
     )
   `);
 
   insert.run({
-    id: 'sqlite-1',
-    slug: 'sqlite-post',
-    locale: 'zh',
-    title: 'SQLite Post',
-    summary: 'Loaded at runtime.',
+    id: 'sqlite-group',
+    groupId: 'sqlite-group',
     category: 'sqlite-notes',
     heroImage: '/assets/blog/unraid-layout.svg',
     updatedAt: '2026-05-21',
-    tagsJson: JSON.stringify(['SQLite', 'Runtime']),
+    tagIdsJson: JSON.stringify(['sqlite', 'runtime']),
     published: 1,
     status: 'published',
     series: 'runtime-notes',
-    body: '## SQLite body',
+    slugZh: 'sqlite-post',
+    titleZh: 'SQLite Post',
+    summaryZh: 'Loaded at runtime.',
+    bodyZh: '## SQLite body',
+    slugEn: options.includeEnglish ? 'sqlite-post-en' : null,
+    titleEn: options.includeEnglish ? 'SQLite Post EN' : null,
+    summaryEn: options.includeEnglish ? 'Loaded in English.' : null,
+    bodyEn: options.includeEnglish ? '## SQLite body EN' : null,
   });
   insert.run({
     id: 'sqlite-2',
-    slug: 'sqlite-draft',
-    locale: 'zh',
-    title: 'SQLite Draft',
-    summary: 'Draft row.',
+    groupId: 'sqlite-draft',
     category: 'draft-notes',
     heroImage: '/assets/blog/unraid-layout.svg',
     updatedAt: '2026-05-22',
-    tagsJson: JSON.stringify(['SQLite']),
+    tagIdsJson: JSON.stringify(['sqlite']),
     published: 0,
     status: 'draft',
     series: null,
-    body: '## Draft body',
+    slugZh: 'sqlite-draft',
+    titleZh: 'SQLite Draft',
+    summaryZh: 'Draft row.',
+    bodyZh: '## Draft body',
+    slugEn: null,
+    titleEn: null,
+    summaryEn: null,
+    bodyEn: null,
   });
   if (options.includeMalformedDraft) {
     insert.run({
       id: 'sqlite-bad-draft',
-      slug: 'sqlite-bad-draft',
-      locale: 'zh',
-      title: 'Bad Draft',
-      summary: 'Hidden malformed row.',
+      groupId: 'sqlite-bad-draft',
       category: 'broken',
       heroImage: '/assets/blog/unraid-layout.svg',
       updatedAt: '2026-05-23',
-      tagsJson: '{not-json',
+      tagIdsJson: '{not-json',
       published: 0,
       status: 'draft',
       series: null,
-      body: '',
+      slugZh: 'sqlite-bad-draft',
+      titleZh: 'Bad Draft',
+      summaryZh: 'Hidden malformed row.',
+      bodyZh: '',
+      slugEn: null,
+      titleEn: null,
+      summaryEn: null,
+      bodyEn: null,
     });
   }
 
@@ -332,6 +388,7 @@ function blogPost(overrides: Partial<BlogPost> = {}): BlogPost {
     heroImage: '/assets/blog/unraid-layout.svg',
     updatedAt: '2026-05-01',
     tags: ['Blog'],
+    tagIds: ['blog'],
     published: true,
     status: 'published',
     body: '## Body',

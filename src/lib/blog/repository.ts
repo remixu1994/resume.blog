@@ -1,6 +1,5 @@
 import { renderMarkdown } from '@devfolio-blog/markdown';
 import type { Locale } from '@devfolio-blog/shared-types';
-import { createMarkdownBlogSource } from './markdown-source';
 import { resolveBlogSlug } from './slug-aliases';
 import { createSqliteBlogSource } from './sqlite-source';
 import type { BlogContentSource, BlogPost, BlogPostSummary } from './types';
@@ -23,10 +22,6 @@ export function getBlogPost(locale: Locale, slug: string, sources = getDefaultBl
         relatedPosts: getRelatedBlogPosts(item, posts),
       }
     : null;
-}
-
-export function getStaticMarkdownBlogParams(source = createMarkdownBlogSource()) {
-  return toPublicPosts(source.listPosts()).map((post) => ({ locale: post.locale, slug: post.slug }));
 }
 
 export function getBlogTopics(posts: BlogPostSummary[]) {
@@ -77,12 +72,16 @@ export function getRelatedBlogPosts(item: BlogPostSummary, posts: BlogPostSummar
       score:
         (post.category === item.category ? 3 : 0) +
         (item.series && post.series === item.series ? 10 : 0) +
-        post.tags.filter((tag) => item.tags.includes(tag)).length,
+        getRelatedTagIds(post).filter((tagId) => getRelatedTagIds(item).includes(tagId)).length,
     }))
     .filter(({ score }) => score > 0)
     .sort((left, right) => right.score - left.score || right.post.updatedAt.localeCompare(left.post.updatedAt))
     .slice(0, 3)
     .map(({ post }) => post);
+}
+
+function getRelatedTagIds(post: BlogPostSummary) {
+  return post.tagIds?.length ? post.tagIds : post.tags;
 }
 
 export function mergeBlogSources(sources: BlogContentSource[]) {
@@ -98,7 +97,7 @@ export function mergeBlogSources(sources: BlogContentSource[]) {
 }
 
 function getDefaultBlogSources(): BlogContentSource[] {
-  return [createMarkdownBlogSource(), createSqliteBlogSource()];
+  return [createSqliteBlogSource()];
 }
 
 function toPublicPosts(posts: BlogPost[]) {
@@ -117,6 +116,7 @@ function toSummary(post: BlogPost): BlogPostSummary {
     heroImage: post.heroImage,
     updatedAt: post.updatedAt,
     tags: post.tags,
+    tagIds: post.tagIds,
     published: post.published,
     status: post.status,
     source: post.source,

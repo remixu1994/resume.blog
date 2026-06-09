@@ -2,7 +2,9 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import Database from 'better-sqlite3';
 import { blogPostSchema, sqliteBlogPostRowSchema, type SqliteBlogPostRow } from './schema';
+import { tagIdsToLabels } from './tags';
 import type { BlogPost, BlogContentSource } from './types';
+import type { Locale } from '@devfolio-blog/shared-types';
 
 const DEFAULT_DB_PATH = 'data/blog.sqlite';
 
@@ -24,54 +26,72 @@ export function readSqliteBlogPosts(dbPath = getBlogDatabasePath()): BlogPost[] 
     const rows = db
       .prepare(
         `select id,
-                slug,
-                locale,
-                title,
-                summary,
+                group_id,
                 category,
                 hero_image,
                 updated_at,
-                tags_json,
+                tag_ids_json,
                 published,
                 status,
                 series,
-                body
+                slug_zh,
+                title_zh,
+                summary_zh,
+                body_zh,
+                slug_en,
+                title_en,
+                summary_en,
+                body_en
            from blog_posts
           where published = 1
             and status = 'published'`,
       )
       .all();
 
-    return rows.map(mapSqliteBlogPostRow);
+    return rows.flatMap(mapSqliteBlogPostRow);
   } finally {
     db.close();
   }
 }
 
-export function mapSqliteBlogPostRow(row: unknown): BlogPost {
+export function mapSqliteBlogPostRow(row: unknown): BlogPost[] {
   const parsed = sqliteBlogPostRowSchema.parse(row);
+  return (['zh', 'en'] as const)
+    .map((locale) => mapLocalizedSqliteBlogPostRow(parsed, locale))
+    .filter((post): post is BlogPost => Boolean(post));
+}
+
+function mapLocalizedSqliteBlogPostRow(row: SqliteBlogPostRow, locale: Locale): BlogPost | null {
+  const slug = locale === 'zh' ? row.slug_zh : row.slug_en;
+  const title = locale === 'zh' ? row.title_zh : row.title_en;
+  const summary = locale === 'zh' ? row.summary_zh : row.summary_en;
+  const body = locale === 'zh' ? row.body_zh : row.body_en;
+  if (!slug || !title || !summary || !body) return null;
+
+  const tagIds = parseTagIds(row);
   return blogPostSchema.parse({
-    id: parsed.id,
-    slug: parsed.slug,
-    locale: parsed.locale,
-    title: parsed.title,
-    summary: parsed.summary,
-    heroImage: parsed.hero_image,
-    updatedAt: parsed.updated_at,
-    category: parsed.category,
-    tags: parseTags(parsed),
-    published: Boolean(parsed.published),
-    status: parsed.status,
-    series: parsed.series || undefined,
-    body: parsed.body,
+    id: `${row.group_id}:${locale}`,
+    slug,
+    locale,
+    title,
+    summary,
+    heroImage: row.hero_image,
+    updatedAt: row.updated_at,
+    category: row.category,
+    tags: tagIdsToLabels(tagIds, locale),
+    tagIds,
+    published: Boolean(row.published),
+    status: row.status,
+    series: row.series || undefined,
+    body,
     source: 'sqlite',
   });
 }
 
-function parseTags(row: SqliteBlogPostRow) {
-  const value = JSON.parse(row.tags_json);
+function parseTagIds(row: SqliteBlogPostRow) {
+  const value = JSON.parse(row.tag_ids_json);
   if (!Array.isArray(value) || !value.every((item) => typeof item === 'string')) {
-    throw new Error(`Invalid tags_json for blog post ${row.id}`);
+    throw new Error(`Invalid tag_ids_json for blog post ${row.id}`);
   }
 
   return value;

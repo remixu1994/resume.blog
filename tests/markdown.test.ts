@@ -53,4 +53,17 @@ title: Hidden metadata
     expect(html).not.toContain('title:');
     expect(html).toContain('<h2>Visible title</h2>');
   });
+
+  it('renders mermaid code blocks as diagram containers', () => {
+    const html = renderMarkdown(`\`\`\`mermaid
+flowchart LR
+  A["Business"] --> B["Model"]
+\`\`\``);
+
+    expect(html).toContain('<figure class="mermaid-block" data-mermaid-block>');
+    expect(html).toContain('<pre class="mermaid" data-mermaid>');
+    expect(html).toContain('A[&quot;Business&quot;] --&gt; B[&quot;Model&quot;]');
+    expect(html).not.toContain('data-copy-code');
+    expect(html).not.toContain('language-mermaid');
+  });
 });

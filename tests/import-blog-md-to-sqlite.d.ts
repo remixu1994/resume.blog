@@ -13,4 +13,6 @@ declare module '../scripts/import-blog-md-to-sqlite.mjs' {
     importedCount: number;
     sourceCount: number;
   };
+
+  export function stripSourceReferences(markdown: string): string;
 }

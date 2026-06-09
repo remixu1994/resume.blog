@@ -1,28 +1,6 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { blogPostSchema } from './schema';
-import type { BlogPost, BlogContentSource } from './types';
-
-const DEFAULT_BLOG_DIR = 'content/blog';
-
-export function createMarkdownBlogSource(rootDir = join(process.cwd(), DEFAULT_BLOG_DIR)): BlogContentSource {
-  return {
-    listPosts: () => readMarkdownBlogPosts(rootDir),
-  };
-}
-
-export function readMarkdownBlogPosts(rootDir = join(process.cwd(), DEFAULT_BLOG_DIR)): BlogPost[] {
-  if (!existsSync(rootDir)) return [];
-
-  return readdirSync(rootDir, { withFileTypes: true })
-    .filter((localeDir) => localeDir.isDirectory())
-    .flatMap((localeDir) => {
-      const localePath = join(rootDir, localeDir.name);
-      return readdirSync(localePath, { withFileTypes: true })
-        .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
-        .map((entry) => parseBlogMarkdown(readFileSync(join(localePath, entry.name), 'utf8')));
-    });
-}
+import { toTagIds } from './tags';
+import type { BlogPost } from './types';
 
 export function parseBlogMarkdown(markdown: string): BlogPost {
   const normalized = normalizeMarkdown(markdown);
@@ -33,7 +11,8 @@ export function parseBlogMarkdown(markdown: string): BlogPost {
 
   const [, frontmatter, body] = match;
   const raw = parseFrontmatter(frontmatter);
-  return blogPostSchema.parse({ ...raw, body: body.trim(), source: 'md' });
+  const tags = Array.isArray(raw.tags) ? raw.tags.filter((item): item is string => typeof item === 'string') : [];
+  return blogPostSchema.parse({ ...raw, body: body.trim(), source: 'md', tagIds: toTagIds(tags) });
 }
 
 function normalizeMarkdown(markdown: string) {

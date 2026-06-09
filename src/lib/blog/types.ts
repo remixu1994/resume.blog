@@ -12,6 +12,7 @@ export interface BlogPost {
   heroImage: string;
   updatedAt: string;
   tags: string[];
+  tagIds?: string[];
   published: boolean;
   status: PostStatus;
   body: string;

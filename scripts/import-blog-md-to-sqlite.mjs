@@ -53,6 +53,47 @@ const SLUG_OVERRIDES = new Map([
 ]);
 
 const DEFAULT_DB_PATH = join(process.cwd(), 'data', 'blog.sqlite');
+const TAG_ALIASES = {
+  'AI Agent': 'ai-agent',
+  Algorithm: 'algorithm',
+  Architecture: 'architecture',
+  Automation: 'automation',
+  Blog: 'blog',
+  cAdvisor: 'c-advisor',
+  DDD: 'ddd',
+  '.NET': 'dotnet',
+  'ASP.NET Core': 'aspnet-core',
+  'C#': 'csharp',
+  Fitness: 'fitness',
+  Grafana: 'grafana',
+  Hermes: 'hermes',
+  'Home Assistant': 'home-assistant',
+  Markdown: 'markdown',
+  Microservices: 'microservices',
+  Monitoring: 'monitoring',
+  NAS: 'nas',
+  Product: 'product',
+  Prometheus: 'prometheus',
+  Refactoring: 'refactoring',
+  SQLite: 'sqlite',
+  'Self-hosting': 'self-hosting',
+  TDD: 'tdd',
+  Unraid: 'unraid',
+  '\u5185\u5bb9\u5e73\u53f0': 'content-platform',
+  '\u57fa\u7840\u77e5\u8bc6': 'fundamentals',
+  '\u5fae\u670d\u52a1': 'microservices',
+  '\u670d\u52a1\u8fb9\u754c': 'service-boundaries',
+  '\u6781\u9650\u7f16\u7a0b': 'extreme-programming',
+  '\u67b6\u6784': 'architecture',
+  '\u6a21\u5757\u5316\u67b6\u6784': 'modular-architecture',
+  '\u6f14\u8fdb': 'evolution',
+  '\u7cfb\u7edf\u8bbe\u8ba1': 'system-design',
+  '\u7b97\u6cd5': 'algorithm',
+  '\u7f16\u7a0b\u57fa\u7840': 'programming',
+  '\u81ea\u6258\u7ba1': 'self-hosting',
+  '\u91cd\u6784': 'refactoring',
+  '\u9886\u57df\u5efa\u6a21': 'domain-modeling',
+};
 
 export function importBlogDraftsIntoSqlite({
   dbPath = DEFAULT_DB_PATH,
@@ -60,49 +101,6 @@ export function importBlogDraftsIntoSqlite({
 } = {}) {
   const db = openDatabase(dbPath);
   try {
-    const insert = db.prepare(`
-      insert into blog_posts (
-        id,
-        slug,
-        locale,
-        title,
-        summary,
-        category,
-        hero_image,
-        updated_at,
-        tags_json,
-        published,
-        status,
-        series,
-        body
-      ) values (
-        @id,
-        @slug,
-        @locale,
-        @title,
-        @summary,
-        @category,
-        @heroImage,
-        @updatedAt,
-        @tagsJson,
-        @published,
-        @status,
-        @series,
-        @body
-      )
-      on conflict(locale, slug) do update set
-        title = excluded.title,
-        summary = excluded.summary,
-        category = excluded.category,
-        hero_image = excluded.hero_image,
-        updated_at = excluded.updated_at,
-        tags_json = excluded.tags_json,
-        published = excluded.published,
-        status = excluded.status,
-        series = excluded.series,
-        body = excluded.body
-    `);
-
     const rows = [];
     for (const config of sourceConfigs) {
       for (const filePath of readMarkdownFiles(config.dir)) {
@@ -111,32 +109,27 @@ export function importBlogDraftsIntoSqlite({
         const slug = canonicalDraftSlug(filePath, parsed.frontmatter.title);
         const title = parsed.frontmatter.title || humanizeSlug(slug);
         const updatedAt = toDateString(statSync(filePath).mtime);
-        const body = normalizeMarkdown(parsed.body).trim();
+        const body = stripSourceReferences(parsed.body);
 
-        rows.push({
-          id: `blog-${config.category}-${slug}`,
-          slug,
+        rows.push(toLocalizedImportRow({
+          groupId: slug,
           locale: 'zh',
           title,
-          summary: buildSummary(body),
+          slug,
+          summary: parsed.frontmatter.summary || buildSummary(body),
           category: config.category,
           heroImage: config.heroImage,
           updatedAt,
-          tagsJson: JSON.stringify(config.tags),
+          tags: config.tags,
           published: 1,
           status: 'published',
           series: config.series,
           body,
-        });
+        }));
       }
     }
 
-    const transaction = db.transaction((entries) => {
-      for (const row of entries) {
-        insert.run(row);
-      }
-    });
-    transaction(rows);
+    upsertLocalizedRows(db, rows);
 
     return { dbPath, importedCount: rows.length, sourceCount: sourceConfigs.length };
   } finally {
@@ -148,34 +141,107 @@ function openDatabase(dbPath) {
   mkdirSync(dirname(dbPath), { recursive: true });
   const db = new Database(dbPath);
 
-  db.exec(`
-    create table if not exists blog_posts (
-      id text primary key,
-      slug text not null,
-      locale text not null,
-      title text not null,
-      summary text not null,
-      category text not null default 'uncategorized',
-      hero_image text not null,
-      updated_at text not null,
-      tags_json text not null,
-      published integer not null,
-      status text not null,
-      series text,
-      body text not null
-    );
-    create unique index if not exists blog_posts_locale_slug_idx on blog_posts(locale, slug);
-  `);
-
-  ensureCategoryColumn(db);
+  createBlogPostsTable(db);
+  migrateLegacyBlogPosts(db);
+  createBlogPostIndexes(db);
   return db;
 }
 
-function ensureCategoryColumn(db) {
+function createBlogPostsTable(db) {
+  db.exec(`
+    create table if not exists blog_posts (
+      id text primary key,
+      group_id text not null unique,
+      category text not null default 'uncategorized',
+      hero_image text not null,
+      updated_at text not null,
+      tag_ids_json text not null,
+      published integer not null,
+      status text not null,
+      series text,
+      slug_zh text,
+      title_zh text,
+      summary_zh text,
+      body_zh text,
+      slug_en text,
+      title_en text,
+      summary_en text,
+      body_en text
+    );
+  `);
+}
+
+function createBlogPostIndexes(db) {
+  db.exec(`
+    create unique index if not exists blog_posts_slug_zh_idx on blog_posts(slug_zh) where slug_zh is not null;
+    create unique index if not exists blog_posts_slug_en_idx on blog_posts(slug_en) where slug_en is not null;
+  `);
+}
+
+function migrateLegacyBlogPosts(db) {
   const columns = db.prepare('pragma table_info(blog_posts)').all();
-  if (!columns.some((column) => column.name === 'category')) {
-    db.exec(`alter table blog_posts add column category text not null default 'uncategorized';`);
-  }
+  if (!columns.some((column) => column.name === 'locale')) return;
+
+  const legacyRows = db.prepare(`
+    select id,
+           slug,
+           locale,
+           title,
+           summary,
+           coalesce(category, 'uncategorized') as category,
+           hero_image,
+           updated_at,
+           tags_json,
+           published,
+           status,
+           series,
+           body
+      from blog_posts
+  `).all();
+
+  db.exec(`
+    drop index if exists blog_posts_locale_slug_idx;
+    alter table blog_posts rename to blog_posts_legacy;
+    create table blog_posts (
+      id text primary key,
+      group_id text not null unique,
+      category text not null default 'uncategorized',
+      hero_image text not null,
+      updated_at text not null,
+      tag_ids_json text not null,
+      published integer not null,
+      status text not null,
+      series text,
+      slug_zh text,
+      title_zh text,
+      summary_zh text,
+      body_zh text,
+      slug_en text,
+      title_en text,
+      summary_en text,
+      body_en text
+    );
+    create unique index if not exists blog_posts_slug_zh_idx on blog_posts(slug_zh) where slug_zh is not null;
+    create unique index if not exists blog_posts_slug_en_idx on blog_posts(slug_en) where slug_en is not null;
+  `);
+
+  upsertLocalizedRows(db, legacyRows.map((row) => toLocalizedImportRow({
+    groupId: row.slug,
+    locale: row.locale,
+    slug: row.slug,
+    title: row.title,
+    summary: row.summary,
+    category: row.category,
+    heroImage: row.hero_image,
+    updatedAt: row.updated_at,
+    tags: parseJsonArray(row.tags_json),
+    published: row.published,
+    status: row.status,
+    series: row.series,
+    body: row.body,
+  })));
+
+  db.exec('drop table blog_posts_legacy;');
 }
 
 function readMarkdownFiles(dir) {
@@ -250,7 +316,37 @@ function stripQuotes(value) {
 }
 
 function normalizeMarkdown(markdown) {
-  return markdown.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+  return markdown.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+}
+
+export function stripSourceReferences(markdown) {
+  const sourceHeadings = new Set([
+    '\u539f\u59cb\u6765\u6e90',
+    '\u6765\u6e90',
+    '\u539f\u6587\u6765\u6e90',
+    '\u53c2\u8003\u6765\u6e90',
+  ]);
+  const lines = normalizeMarkdown(markdown).split('\n');
+  const result = [];
+  let skippingSourceBlock = false;
+
+  for (const line of lines) {
+    const heading = /^##\s+(.+?)\s*$/.exec(line.trim());
+    if (heading) {
+      const title = heading[1].trim();
+      if (sourceHeadings.has(title)) {
+        skippingSourceBlock = true;
+        continue;
+      }
+      skippingSourceBlock = false;
+    }
+
+    if (!skippingSourceBlock) {
+      result.push(line);
+    }
+  }
+
+  return result.join('\n').trim();
 }
 
 function canonicalDraftSlug(filePath, title) {
@@ -297,6 +393,152 @@ function truncate(value, limit) {
   return `${value.slice(0, limit - 1).trimEnd()}…`;
 }
 
+function toLocalizedImportRow({
+  groupId,
+  locale,
+  slug,
+  title,
+  summary,
+  category,
+  heroImage,
+  updatedAt,
+  tags,
+  published,
+  status,
+  series,
+  body,
+}) {
+  if (locale !== 'zh' && locale !== 'en') {
+    throw new Error(`Unsupported blog locale: ${locale}`);
+  }
+
+  const row = {
+    id: `blog-${groupId}`,
+    groupId,
+    category,
+    heroImage,
+    updatedAt,
+    tagIdsJson: JSON.stringify(toTagIds(tags)),
+    published,
+    status,
+    series,
+    slugZh: null,
+    titleZh: null,
+    summaryZh: null,
+    bodyZh: null,
+    slugEn: null,
+    titleEn: null,
+    summaryEn: null,
+    bodyEn: null,
+  };
+
+  if (locale === 'zh') {
+    row.slugZh = slug;
+    row.titleZh = title;
+    row.summaryZh = summary;
+    row.bodyZh = body;
+  } else {
+    row.slugEn = slug;
+    row.titleEn = title;
+    row.summaryEn = summary;
+    row.bodyEn = body;
+  }
+
+  return row;
+}
+
+function upsertLocalizedRows(db, rows) {
+  const insert = db.prepare(`
+    insert into blog_posts (
+      id,
+      group_id,
+      category,
+      hero_image,
+      updated_at,
+      tag_ids_json,
+      published,
+      status,
+      series,
+      slug_zh,
+      title_zh,
+      summary_zh,
+      body_zh,
+      slug_en,
+      title_en,
+      summary_en,
+      body_en
+    ) values (
+      @id,
+      @groupId,
+      @category,
+      @heroImage,
+      @updatedAt,
+      @tagIdsJson,
+      @published,
+      @status,
+      @series,
+      @slugZh,
+      @titleZh,
+      @summaryZh,
+      @bodyZh,
+      @slugEn,
+      @titleEn,
+      @summaryEn,
+      @bodyEn
+    )
+    on conflict(group_id) do update set
+      category = excluded.category,
+      hero_image = excluded.hero_image,
+      updated_at = max(blog_posts.updated_at, excluded.updated_at),
+      tag_ids_json = excluded.tag_ids_json,
+      published = excluded.published,
+      status = excluded.status,
+      series = excluded.series,
+      slug_zh = coalesce(excluded.slug_zh, blog_posts.slug_zh),
+      title_zh = coalesce(excluded.title_zh, blog_posts.title_zh),
+      summary_zh = coalesce(excluded.summary_zh, blog_posts.summary_zh),
+      body_zh = coalesce(excluded.body_zh, blog_posts.body_zh),
+      slug_en = coalesce(excluded.slug_en, blog_posts.slug_en),
+      title_en = coalesce(excluded.title_en, blog_posts.title_en),
+      summary_en = coalesce(excluded.summary_en, blog_posts.summary_en),
+      body_en = coalesce(excluded.body_en, blog_posts.body_en)
+  `);
+
+  const transaction = db.transaction((entries) => {
+    for (const row of entries) {
+      insert.run(row);
+    }
+  });
+  transaction(rows);
+}
+
+function toTagIds(labels) {
+  return [...new Set(labels.map(toTagId).filter(Boolean))];
+}
+
+function toTagId(label) {
+  const trimmed = String(label).trim();
+  return TAG_ALIASES[trimmed] ?? createStableId(trimmed);
+}
+
+function createStableId(value) {
+  return value
+    .normalize('NFKC')
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase();
+}
+
+function parseJsonArray(value) {
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
 function humanizeSlug(slug) {
   return slug
     .replace(/[-_]+/g, ' ')
@@ -311,7 +553,7 @@ function toDateString(date) {
 function main() {
   const { dbPath, sourceConfigs } = parseArgs(process.argv.slice(2));
   const result = importBlogDraftsIntoSqlite({ dbPath, sourceConfigs });
-  console.log(`Imported ${result.importedCount} blog drafts into ${result.dbPath}`);
+  console.log(`Imported ${result.importedCount} blog posts into ${result.dbPath}`);
 }
 
 function parseArgs(args) {

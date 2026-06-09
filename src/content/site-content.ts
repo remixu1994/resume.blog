@@ -38,6 +38,7 @@ const blogCategoryLabels: Record<
     architecture: '架构',
     'unraid-nas': 'Unraid Nas',
     fundamentals: '\u57fa\u7840\u77e5\u8bc6\u6280\u80fd',
+    'dotnet-core': 'C# / .NET Core',
     uncategorized: '未分类',
   },
   en: {
@@ -46,6 +47,7 @@ const blogCategoryLabels: Record<
     architecture: 'Architecture',
     'unraid-nas': 'Unraid NAS',
     fundamentals: 'Fundamentals',
+    'dotnet-core': 'C# / .NET Core',
     uncategorized: 'Uncategorized',
   },
 };
