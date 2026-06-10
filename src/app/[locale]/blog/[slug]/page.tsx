@@ -1,25 +1,33 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { getBlogDetailViewModel, getBlogListViewModel } from '@/content/site-content';
+import { notFound, redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { getBlogCategoryLabel, getBlogDetailViewModel } from '@/content/site-content';
 import { MarkdownBody } from '@/lib/markdown';
-import { locales, requireLocale } from '@/lib/locale';
+import { requireLocale } from '@/lib/locale';
+import { hasBlogSlugAlias, resolveBlogSlug } from '@/lib/blog/slug-aliases';
 
-export function generateStaticParams() {
-  return locales.flatMap((locale) =>
-    getBlogListViewModel(locale).items.map((item) => ({ locale, slug: item.slug })),
-  );
-}
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
+  await connection();
   const { locale: localeParam, slug } = await params;
   const locale = requireLocale(localeParam);
-  const viewModel = getBlogDetailViewModel(locale, slug);
+  const normalizedSlug = resolveBlogSlug(decodeRouteSlug(slug));
+  if (hasBlogSlugAlias(decodeRouteSlug(slug)) && normalizedSlug !== slug) {
+    const canonicalPath = `/${locale}/blog/${encodeURIComponent(normalizedSlug)}`;
+    redirect(canonicalPath);
+  }
+
+  const viewModel = getBlogDetailViewModel(locale, normalizedSlug);
   if (!viewModel) notFound();
 
   return (
     <article>
       <header className="article-hero">
-        <p className="eyebrow">{viewModel.item.updatedAt}</p>
+        <p className="eyebrow">
+          {viewModel.item.updatedAt} / {getBlogCategoryLabel(locale, viewModel.item.category)}
+        </p>
         <h1 className="article-title">{viewModel.item.title}</h1>
         <p className="lede">{viewModel.item.summary}</p>
         <div className="tag-row">
@@ -38,7 +46,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ loc
           <p className="eyebrow">Related</p>
           <div className="list">
             {viewModel.relatedPosts.map((post) => (
-              <Link className="item" key={post.id} href={`/${locale}/blog/${post.slug}`}>
+              <Link className="item" key={post.id} href={`/${locale}/blog/${encodeURIComponent(post.slug)}`}>
                 <h3>{post.title}</h3>
                 <p>{post.summary}</p>
               </Link>
@@ -48,4 +56,12 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ loc
       </div>
     </article>
   );
+}
+
+function decodeRouteSlug(slug: string) {
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
 }

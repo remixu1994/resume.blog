@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import type { ArchitectureCase, PublicPostSummary, TopicShowcase } from '@devfolio-blog/shared-types';
+import type { ArchitectureCase, Locale, PublicPostSummary, TopicShowcase } from '@devfolio-blog/shared-types';
+import { getBlogCategoryLabel } from '@/content/site-content';
 
-export function ArchitectureCard({ locale, item }: { locale: string; item: ArchitectureCase }) {
+export function ArchitectureCard({ locale, item }: { locale: Locale; item: ArchitectureCase }) {
   return (
     <Link className="panel item" href={`/${locale}/architecture/${item.slug}`}>
       <p className="eyebrow">{item.updatedAt}</p>
@@ -18,11 +19,11 @@ export function ArchitectureCard({ locale, item }: { locale: string; item: Archi
   );
 }
 
-export function PostCard({ locale, post }: { locale: string; post: PublicPostSummary }) {
+export function PostCard({ locale, post }: { locale: Locale; post: PublicPostSummary }) {
   return (
-    <Link className="item" href={`/${locale}/blog/${post.slug}`}>
+    <Link className="item" href={`/${locale}/blog/${encodeURIComponent(post.slug)}`}>
       <p className="article-meta">
-        {post.updatedAt}
+        {post.updatedAt} / {getBlogCategoryLabel(locale, post.category)}
         {post.series ? ` / ${post.series}` : ''}
       </p>
       <h2>{post.title}</h2>
@@ -38,7 +39,7 @@ export function PostCard({ locale, post }: { locale: string; post: PublicPostSum
   );
 }
 
-export function TopicCard({ locale, item }: { locale: string; item: TopicShowcase }) {
+export function TopicCard({ locale, item }: { locale: Locale; item: TopicShowcase }) {
   const path = item.slug === 'fitness-ai-agent' ? 'fitness' : item.slug.replace('-notes', '');
 
   return (

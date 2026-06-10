@@ -1,4 +1,4 @@
-import type { ResumeProject } from '@devfolio-blog/shared-types';
+import type { ResumeExperience, ResumeProject } from '@devfolio-blog/shared-types';
 import { ResumeProjectShowcase } from '@/components/resume-project-showcase';
 import { getResumeViewModel } from '@/content/site-content';
 import { requireLocale } from '@/lib/locale';
@@ -8,15 +8,19 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
   const locale = requireLocale(localeParam);
   const { dictionary, resume } = getResumeViewModel(locale);
   const contactEmail = resume.contactEmail.trim();
-  const contactLabel = locale === 'zh' ? '联系我' : 'Email Me';
+  const isZh = locale === 'zh';
+  const contactLabel = isZh ? '联系我' : 'Email Me';
+  const projectLabel = isZh ? '代表项目' : resume.labels.projectExperience;
+  const contributionLabel = isZh ? '关键贡献' : 'Key contributions';
+  const stackLabel = isZh ? '技术栈' : 'Stack';
 
   return (
     <>
-      <header className="article-hero resume-hero">
+      <header className="resume-hero">
         <div className="resume-hero-copy">
           <p className="eyebrow">{dictionary.resume.title}</p>
-          <h1 className="page-title">{resume.name}</h1>
-          <p className="lede">{resume.headline}</p>
+          <h1 className="resume-title">{resume.name}</h1>
+          <p className="resume-headline">{resume.headline}</p>
           <p className="lede">{resume.intro}</p>
           <div className="button-row">
             <a className="button" href="/resume/moon-devfolio-resume.pdf">
@@ -39,8 +43,8 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
         </aside>
       </header>
 
-      <section className="resume-scan-grid">
-        <article className="article-panel summary-panel">
+      <section className="resume-overview">
+        <article className="summary-panel">
           <p className="eyebrow">{resume.labels.professionalSummary}</p>
           <ul className="check-list">
             {resume.summaryPoints.map((point) => (
@@ -48,12 +52,12 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
             ))}
           </ul>
         </article>
-        <aside className="panel skill-panel">
+        <article className="skill-panel">
           <p className="eyebrow">{resume.labels.competences}</p>
           <div className="skill-grid">
             {resume.skillGroups.map((group) => (
-              <div className="skill-row" key={group.title}>
-                <h3>{group.title}</h3>
+              <section className="skill-row" key={group.title}>
+                <h2>{group.title}</h2>
                 <div className="tag-row">
                   {group.items.map((item) => (
                     <span className="tag" key={item}>
@@ -61,100 +65,128 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
                     </span>
                   ))}
                 </div>
-              </div>
+              </section>
             ))}
           </div>
-        </aside>
+        </article>
       </section>
 
-      <section className="section content-grid resume-content-grid">
-        <div className="list">
-          <article className="article-panel">
-            <p className="eyebrow">{resume.labels.projectExperience}</p>
-            <div className="list">
-              {resume.projects.map((project) => (
-                <ProjectBlock key={project.title} project={project} labels={resume.labels} />
-              ))}
-            </div>
-          </article>
-
-          <article className="article-panel">
-            <p className="eyebrow">{resume.labels.employmentHistory}</p>
-            <div className="list">
-              {resume.experiences.map((item) => (
-                <section className="item" key={`${item.period}-${item.role}`}>
-                  <p className="article-meta">{item.period}</p>
-                  <h2>{item.role}</h2>
-                  <p className="lede">{item.company}</p>
-                  <p>{item.summary}</p>
-                  <ul>
-                    {item.highlights.map((highlight) => (
-                      <li key={highlight}>{highlight}</li>
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
-          </article>
+      <section className="section resume-section">
+        <div className="resume-section-head">
+          <p className="eyebrow">{resume.labels.projectExperience}</p>
+          <h2 className="section-title">{projectLabel}</h2>
         </div>
+        <div className="resume-project-list">
+          {resume.projects.map((project) => (
+            <ProjectBlock
+              key={project.title}
+              project={project}
+              labels={resume.labels}
+              contributionLabel={contributionLabel}
+              stackLabel={stackLabel}
+            />
+          ))}
+        </div>
+      </section>
 
-        <aside className="list">
-          <section className="panel profile-panel">
-            <p className="eyebrow">{resume.labels.profile}</p>
-            <p>{resume.location}</p>
-            <p>{resume.gender}</p>
-            <p>{resume.age}</p>
-            {resume.drivingLicense ? <p>{resume.drivingLicense}</p> : null}
-          </section>
-          <section className="panel">
-            <p className="eyebrow">{resume.labels.education}</p>
-            {resume.education.map((item) => (
-              <div className="item" key={item.school}>
-                <p className="article-meta">{item.period}</p>
-                <h3>{item.school}</h3>
-                <p>{item.degree}</p>
-              </div>
-            ))}
-          </section>
-          <section className="panel">
-            <p className="eyebrow">{resume.labels.languages}</p>
-            {resume.languages.map((item) => (
-              <p key={item.name}>
-                <strong>{item.name}</strong> / {item.proficiency}
-              </p>
-            ))}
-          </section>
-        </aside>
+      <section className="section resume-section">
+        <div className="resume-section-head">
+          <p className="eyebrow">{resume.labels.employmentHistory}</p>
+          <h2 className="section-title">{resume.labels.employmentHistory}</h2>
+        </div>
+        <div className="experience-timeline">
+          {resume.experiences.map((item) => (
+            <ExperienceBlock key={`${item.period}-${item.role}`} item={item} />
+          ))}
+        </div>
+      </section>
+
+      <section className="section resume-info-grid" aria-label={isZh ? '补充信息' : 'Additional information'}>
+        <article className="panel profile-panel">
+          <p className="eyebrow">{resume.labels.profile}</p>
+          <p>{resume.location}</p>
+          <p>{resume.gender}</p>
+          <p>{resume.age}</p>
+          {resume.drivingLicense ? <p>{resume.drivingLicense}</p> : null}
+        </article>
+        <article className="panel">
+          <p className="eyebrow">{resume.labels.education}</p>
+          {resume.education.map((item) => (
+            <div className="resume-info-item" key={item.school}>
+              <p className="article-meta">{item.period}</p>
+              <h2>{item.school}</h2>
+              <p>{item.degree}</p>
+            </div>
+          ))}
+        </article>
+        <article className="panel">
+          <p className="eyebrow">{resume.labels.languages}</p>
+          {resume.languages.map((item) => (
+            <p key={item.name}>
+              <strong>{item.name}</strong> / {item.proficiency}
+            </p>
+          ))}
+        </article>
       </section>
     </>
   );
 }
 
-function ProjectBlock({ project, labels }: { project: ResumeProject; labels: ReturnType<typeof getResumeViewModel>['resume']['labels'] }) {
+function ProjectBlock({
+  project,
+  labels,
+  contributionLabel,
+  stackLabel,
+}: {
+  project: ResumeProject;
+  labels: ReturnType<typeof getResumeViewModel>['resume']['labels'];
+  contributionLabel: string;
+  stackLabel: string;
+}) {
   return (
-    <section className="item project-item">
-      <div className="project-item-head">
+    <article className="resume-project-card">
+      <div className="resume-project-head">
         <div>
           <p className="article-meta">
             {project.period} / {project.role}
           </p>
-          <h2>{project.title}</h2>
+          <h3>{project.title}</h3>
         </div>
         {project.showcase ? <ResumeProjectShowcase project={project} labels={labels} /> : null}
       </div>
-      <p>{project.summary}</p>
-      <div className="tag-row">
+      <p className="resume-project-summary">{project.summary}</p>
+      <div className="resume-project-stack" aria-label={stackLabel}>
         {project.stack.map((item) => (
           <span className="tag" key={item}>
             {item}
           </span>
         ))}
       </div>
-      <ul>
+      <p className="eyebrow resume-contribution-label">{contributionLabel}</p>
+      <ul className="resume-contribution-list">
         {project.highlights.map((highlight) => (
           <li key={highlight}>{highlight}</li>
         ))}
       </ul>
-    </section>
+    </article>
+  );
+}
+
+function ExperienceBlock({ item }: { item: ResumeExperience }) {
+  return (
+    <article className="experience-item">
+      <div className="experience-marker" aria-hidden="true" />
+      <div>
+        <p className="article-meta">{item.period}</p>
+        <h3>{item.role}</h3>
+        <p className="experience-company">{item.company}</p>
+        <p>{item.summary}</p>
+        <ul>
+          {item.highlights.map((highlight) => (
+            <li key={highlight}>{highlight}</li>
+          ))}
+        </ul>
+      </div>
+    </article>
   );
 }

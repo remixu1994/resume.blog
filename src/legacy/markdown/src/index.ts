@@ -1,4 +1,4 @@
-import { marked } from 'marked';
+import { Marked } from 'marked';
 import type {
   Locale,
   RecipeCategory,
@@ -9,13 +9,57 @@ import type {
   RecipeTag,
 } from '@devfolio-blog/shared-types';
 
-marked.setOptions({
-  breaks: true,
+const markdownParser = new Marked({
+  breaks: false,
   gfm: true,
+  renderer: {
+    code({ text, lang }) {
+      const language = normalizeCodeLanguage(lang);
+      const escapedCode = escapeHtml(text);
+      const escapedLanguage = escapeHtml(language);
+
+      if (language === 'mermaid') {
+        return `<figure class="mermaid-block" data-mermaid-block>
+  <pre class="mermaid" data-mermaid>${escapedCode}</pre>
+</figure>`;
+      }
+
+      return `<figure class="code-block" data-code-block>
+  <figcaption class="code-block-header">
+    <span class="code-block-language">${escapedLanguage}</span>
+    <button class="code-block-copy" type="button" data-copy-code aria-label="Copy ${escapedLanguage} code">Copy</button>
+  </figcaption>
+  <pre><code class="language-${escapedLanguage}" data-code>${escapedCode}</code></pre>
+</figure>`;
+    },
+  },
 });
 
 export function renderMarkdown(markdown: string): string {
-  return marked.parse(markdown) as string;
+  return markdownParser.parse(normalizeMarkdown(markdown), { async: false });
+}
+
+function normalizeMarkdown(markdown: string): string {
+  const normalized = markdown.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+  return stripFrontmatter(normalized).trim();
+}
+
+function stripFrontmatter(markdown: string): string {
+  return markdown.replace(/^---\n[\s\S]*?\n---\n?/, '');
+}
+
+function normalizeCodeLanguage(language: string | undefined): string {
+  const value = language?.trim().split(/\s+/)[0].toLowerCase();
+  return value || 'text';
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 type RecipeSectionName =

@@ -156,6 +156,7 @@ export type PostStatus = 'draft' | 'published';
 
 export interface PublicPost extends StaticContentFrontmatter {
   id: string;
+  category: string;
   body: string;
   series?: string;
   status: PostStatus;

@@ -6,11 +6,17 @@ import {
   getFeaturedPayload,
   getTopicBySlug,
   resumeProfiles,
-  seedPosts,
 } from '@devfolio-blog/content-data';
 import { dictionaries, normalizeLocale, switchLocale, withLocalePath } from '@devfolio-blog/i18n';
 import { renderMarkdown } from '@devfolio-blog/markdown';
-import type { BookRecommendation, Locale, PublicPost, PublicPostSummary } from '@devfolio-blog/shared-types';
+import type { BookRecommendation, Locale } from '@devfolio-blog/shared-types';
+import {
+  getBlogPost,
+  getBlogCategories,
+  getBlogSeries,
+  getBlogTopics,
+  listBlogPosts,
+} from '@/lib/blog/repository';
 
 const selectedBookSlugs = [
   'refactoring',
@@ -21,6 +27,30 @@ const selectedBookSlugs = [
   'implementing-domain-driven-design',
   'the-mythical-man-month',
 ] as const;
+
+const blogCategoryLabels: Record<
+  Locale,
+  Record<string, string>
+> = {
+  zh: {
+    'microservices-ddd': '微服务 & DDD',
+    'extreme-programming': '极限编程',
+    architecture: '架构',
+    'unraid-nas': 'Unraid Nas',
+    fundamentals: '\u57fa\u7840\u77e5\u8bc6\u6280\u80fd',
+    'dotnet-core': 'C# / .NET Core',
+    uncategorized: '未分类',
+  },
+  en: {
+    'microservices-ddd': 'Microservices & DDD',
+    'extreme-programming': 'Extreme Programming',
+    architecture: 'Architecture',
+    'unraid-nas': 'Unraid NAS',
+    fundamentals: 'Fundamentals',
+    'dotnet-core': 'C# / .NET Core',
+    uncategorized: 'Uncategorized',
+  },
+};
 
 const bookPageNarrative: Record<
   Locale,
@@ -207,14 +237,13 @@ export function getShellLinks(locale: Locale) {
     { label: dictionaries[locale].nav.home, href: withLocalePath(locale) },
     { label: dictionaries[locale].nav.resume, href: withLocalePath(locale, 'resume') },
     { label: dictionaries[locale].nav.books, href: withLocalePath(locale, 'books') },
-    { label: dictionaries[locale].nav.fitness, href: withLocalePath(locale, 'fitness') },
     { label: dictionaries[locale].nav.recipes, href: withLocalePath(locale, 'recipes') },
     { label: dictionaries[locale].nav.blog, href: withLocalePath(locale, 'blog') },
   ];
 }
 
 export function getHomeViewModel(locale: Locale) {
-  const posts = getPublishedPosts(locale);
+  const posts = listBlogPosts(locale);
 
   return {
     dictionary: dictionaries[locale],
@@ -291,81 +320,42 @@ export function getBooksViewModel(locale: Locale) {
   };
 }
 
-export function getBlogListViewModel(locale: Locale) {
-  const items = getPublishedPosts(locale);
+export function getBlogCategoryLabel(locale: Locale, category: string) {
+  return blogCategoryLabels[locale][category] ?? category;
+}
+
+export function getBlogListViewModel(locale: Locale, category?: string) {
+  const items = listBlogPosts(locale);
+  const categories = getBlogCategories(items);
+  const filteredItems = category ? items.filter((post) => post.category === category) : items;
 
   return {
     dictionary: dictionaries[locale],
-    items,
-    highlightedPost: items[0],
-    latestPosts: items.slice(1),
+    items: filteredItems,
+    totalCount: items.length,
+    highlightedPost: filteredItems[0],
+    latestPosts: filteredItems.slice(1),
     topics: getBlogTopics(items),
     series: getBlogSeries(items),
+    categories: categories.map((item) => ({
+      ...item,
+      label: getBlogCategoryLabel(locale, item.name),
+      slug: item.name,
+      active: item.name === category,
+    })),
+    selectedCategory: category ?? null,
   };
 }
 
 export function getBlogDetailViewModel(locale: Locale, slug: string) {
-  const posts = getPublishedPosts(locale);
-  const item = posts.find((post) => post.slug === slug);
+  const post = getBlogPost(locale, slug);
 
-  return item
+  return post
     ? {
         dictionary: dictionaries[locale],
-        item,
-        html: renderMarkdown(item.body),
-        relatedPosts: getRelatedPosts(item, posts),
+        ...post,
       }
     : null;
-}
-
-
-function getPublishedPosts(locale: Locale): PublicPost[] {
-  return seedPosts
-    .filter((post) => post.locale === locale && post.published)
-    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
-}
-
-function getBlogTopics(posts: PublicPostSummary[]) {
-  const counts = new Map<string, number>();
-
-  for (const post of posts) {
-    for (const tag of post.tags) {
-      counts.set(tag, (counts.get(tag) ?? 0) + 1);
-    }
-  }
-
-  return [...counts.entries()]
-    .map(([name, count]) => ({ name, count }))
-    .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name));
-}
-
-function getBlogSeries(posts: PublicPostSummary[]) {
-  const counts = new Map<string, number>();
-
-  for (const post of posts) {
-    if (post.series) {
-      counts.set(post.series, (counts.get(post.series) ?? 0) + 1);
-    }
-  }
-
-  return [...counts.entries()]
-    .map(([name, count]) => ({ name, count }))
-    .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name));
-}
-
-function getRelatedPosts(item: PublicPostSummary, posts: PublicPostSummary[]) {
-  return posts
-    .filter((post) => post.id !== item.id)
-    .map((post) => ({
-      post,
-      score:
-        (item.series && post.series === item.series ? 10 : 0) +
-        post.tags.filter((tag) => item.tags.includes(tag)).length,
-    }))
-    .filter(({ score }) => score > 0)
-    .sort((left, right) => right.score - left.score || right.post.updatedAt.localeCompare(left.post.updatedAt))
-    .slice(0, 3)
-    .map(({ post }) => post);
 }
 
 function getBooksHomeViewModel(locale: Locale) {
@@ -389,3 +379,5 @@ export function getLocaleSwitch(locale: Locale, currentPath: string) {
     href: withLocalePath(nextLocale, suffix || ''),
   };
 }
+
+
