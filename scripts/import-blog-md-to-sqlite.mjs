@@ -181,6 +181,9 @@ function createBlogPostIndexes(db) {
 function migrateLegacyBlogPosts(db) {
   const columns = db.prepare('pragma table_info(blog_posts)').all();
   if (!columns.some((column) => column.name === 'locale')) return;
+  const categorySelect = columns.some((column) => column.name === 'category')
+    ? "coalesce(category, 'uncategorized') as category"
+    : "'uncategorized' as category";
 
   const legacyRows = db.prepare(`
     select id,
@@ -188,7 +191,7 @@ function migrateLegacyBlogPosts(db) {
            locale,
            title,
            summary,
-           coalesce(category, 'uncategorized') as category,
+           ${categorySelect},
            hero_image,
            updated_at,
            tags_json,

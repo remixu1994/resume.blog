@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Database from 'better-sqlite3';
@@ -154,17 +154,43 @@ Markdown content.`);
   });
 
   it('resolves legacy Chinese blog slugs to canonical English slugs', () => {
-    const detail = getBlogPost('zh', '什么是架构-顶层设计-模块-组件与三大原则', [
-      sourceWithPosts([
+    const aliases = [
+      [
+        '什么是架构-顶层设计-模块-组件与三大原则',
+        'what-is-architecture-top-level-design-modules-components-and-three-principles',
+      ],
+      [
+        '计算机为什么能跑程序-组成原理-存储-链接与并发',
+        'why-computers-can-run-programs-components-storage-linking-concurrency',
+      ],
+      [
+        '数据结构与算法为什么重要-从数组-链表到排序与哈希',
+        'why-data-structures-and-algorithms-matter-arrays-lists-sorting-hash',
+      ],
+      [
+        '面向对象与设计原则-从封装-继承到代码坏味道',
+        'object-orientation-and-design-principles-encapsulation-inheritance-code-smells',
+      ],
+      [
+        '工程协作与交付-git-需求分析与估算',
+        'engineering-collaboration-and-delivery-git-requirements-analysis-and-estimation',
+      ],
+    ] as const;
+    const source = sourceWithPosts(
+      aliases.map(([, canonicalSlug]) =>
         blogPost({
-          slug: 'what-is-architecture-top-level-design-modules-components-and-three-principles',
-          title: 'Chinese slug redirect target',
+          slug: canonicalSlug,
+          title: `Target for ${canonicalSlug}`,
         }),
-      ]),
-    ]);
+      ),
+    );
 
-    expect(detail?.item.slug).toBe('what-is-architecture-top-level-design-modules-components-and-three-principles');
-    expect(detail?.item.title).toBe('Chinese slug redirect target');
+    for (const [legacySlug, canonicalSlug] of aliases) {
+      const detail = getBlogPost('zh', legacySlug, [source]);
+
+      expect(detail?.item.slug).toBe(canonicalSlug);
+      expect(detail?.item.title).toBe(`Target for ${canonicalSlug}`);
+    }
   });
 
   it('resolves encoded detail slugs', () => {
@@ -199,7 +225,9 @@ Markdown content.`);
     tempDirs.push(dir);
     const dbPath = join(dir, 'blog.sqlite');
 
-    const result = importBlogDraftsIntoSqlite({ dbPath });
+    const sourceConfigs = createBlogDraftFixtureSources();
+
+    const result = importBlogDraftsIntoSqlite({ dbPath, sourceConfigs });
     const posts = readSqliteBlogPosts(dbPath);
 
     expect(result.importedCount).toBe(15);
@@ -245,7 +273,8 @@ Keep this section.`);
     const previousDbPath = process.env.BLOG_DB_PATH;
 
     try {
-      importBlogDraftsIntoSqlite({ dbPath });
+      const sourceConfigs = createBlogDraftFixtureSources();
+      importBlogDraftsIntoSqlite({ dbPath, sourceConfigs });
       process.env.BLOG_DB_PATH = dbPath;
 
       const viewModel = getBlogListViewModel('zh', 'architecture');
@@ -260,6 +289,64 @@ Keep this section.`);
         process.env.BLOG_DB_PATH = previousDbPath;
       }
     }
+  });
+
+  it('migrates legacy sqlite posts without a category column', async () => {
+    // @ts-expect-error - the import script is a runtime-only helper.
+    const { importBlogDraftsIntoSqlite } = await import('../scripts/import-blog-md-to-sqlite.mjs');
+    const dir = createTempDatabasePath();
+    tempDirs.push(dir);
+    const dbPath = join(dir, 'blog.sqlite');
+    const db = new Database(dbPath);
+
+    db.exec(`
+      create table blog_posts (
+        id text primary key,
+        slug text not null,
+        locale text not null,
+        title text not null,
+        summary text not null,
+        hero_image text not null,
+        updated_at text not null,
+        tags_json text not null,
+        published integer not null,
+        status text not null,
+        series text,
+        body text not null
+      );
+      create unique index blog_posts_locale_slug_idx on blog_posts(locale, slug);
+    `);
+    db.prepare(`
+      insert into blog_posts (
+        id, slug, locale, title, summary, hero_image, updated_at, tags_json, published, status, series, body
+      ) values (
+        @id, @slug, @locale, @title, @summary, @heroImage, @updatedAt, @tagsJson, @published, @status, @series, @body
+      )
+    `).run({
+      id: 'legacy-post',
+      slug: 'legacy-post',
+      locale: 'zh',
+      title: 'Legacy Post',
+      summary: 'Legacy row without category.',
+      heroImage: '/assets/blog/unraid-layout.svg',
+      updatedAt: '2026-05-24',
+      tagsJson: JSON.stringify(['Blog']),
+      published: 1,
+      status: 'published',
+      series: null,
+      body: '## Legacy body',
+    });
+    db.close();
+
+    importBlogDraftsIntoSqlite({ dbPath, sourceConfigs: [] });
+
+    const posts = readSqliteBlogPosts(dbPath);
+    expect(posts).toHaveLength(1);
+    expect(posts[0]).toMatchObject({
+      slug: 'legacy-post',
+      category: 'uncategorized',
+      title: 'Legacy Post',
+    });
   });
 });
 
@@ -369,6 +456,53 @@ function createBlogDatabase(options: { includeMalformedDraft?: boolean; includeE
 
 function createTempDatabasePath() {
   return mkdtempSync(join(tmpdir(), 'resume-blog-'));
+}
+
+function createBlogDraftFixtureSources() {
+  const root = createTempDatabasePath();
+  tempDirs.push(root);
+  const categories = [
+    { category: 'microservices-ddd', count: 3, series: 'microservices-ddd', tags: ['Microservices', 'DDD'] },
+    { category: 'extreme-programming', count: 4, series: 'extreme-programming', tags: ['TDD', 'Refactoring'] },
+    { category: 'architecture', count: 4, series: 'architecture', tags: ['Architecture', 'System Design'] },
+    { category: 'fundamentals', count: 4, series: 'fundamentals', tags: ['Algorithm', 'Programming'] },
+  ];
+  let index = 0;
+
+  return categories.map((item) => {
+    const dir = join(root, item.category);
+    mkdirSync(dir, { recursive: true });
+
+    for (let offset = 0; offset < item.count; offset += 1) {
+      index += 1;
+      writeFileSync(
+        join(dir, `${String(index).padStart(2, '0')}-fixture-${item.category}-${offset + 1}.md`),
+        `---
+title: Fixture ${item.category} ${offset + 1}
+summary: Fixture summary for ${item.category} ${offset + 1}.
+---
+
+# Fixture ${item.category} ${offset + 1}
+
+This is a committed test fixture generated in a temp directory.
+
+## 原始来源
+
+- C:\\Users\\hp\\drafts\\fixture.md
+- https://example.com/source
+`,
+        'utf8',
+      );
+    }
+
+    return {
+      dir,
+      category: item.category,
+      heroImage: '/assets/blog/nx-monorepo.svg',
+      series: item.series,
+      tags: item.tags,
+    };
+  });
 }
 
 function sourceWithPosts(posts: BlogPost[]): BlogContentSource {
