@@ -193,6 +193,46 @@ Markdown content.`);
     }
   });
 
+  it('resolves old combined dotnet article slugs to split article slugs', () => {
+    const aliases = [
+      [
+        'clr-and-csharp-type-system-objects-heap-and-garbage-collection',
+        'csharp-value-types-reference-types-and-object-semantics',
+      ],
+      [
+        'thread-concurrency-and-synchronization-thread-costs-to-deadlock-governance',
+        'dotnet-thread-costs-threadpool-and-async-boundaries',
+      ],
+      [
+        'dotnet-application-architecture-dependency-injection-mediatr-aop-and-resilience',
+        'aspnet-core-dependency-injection-lifetimes',
+      ],
+      [
+        'service-communication-and-authentication-from-tcp-wcf-to-grpc-and-jwt',
+        'tcp-connection-lifecycle-handshake-and-teardown',
+      ],
+      [
+        'dotnet-engineering-toolchain-cli-and-package-management-practices',
+        'dotnet-cli-daily-development-workflow',
+      ],
+    ] as const;
+    const source = sourceWithPosts(
+      aliases.map(([, canonicalSlug]) =>
+        blogPost({
+          slug: canonicalSlug,
+          title: `Target for ${canonicalSlug}`,
+        }),
+      ),
+    );
+
+    for (const [legacySlug, canonicalSlug] of aliases) {
+      const detail = getBlogPost('zh', legacySlug, [source]);
+
+      expect(detail?.item.slug).toBe(canonicalSlug);
+      expect(detail?.item.title).toBe(`Target for ${canonicalSlug}`);
+    }
+  });
+
   it('resolves encoded detail slugs', () => {
     const slug = 'what-is-architecture-top-level-design-modules-components-and-three-principles';
     const detail = getBlogPost('zh', encodeURIComponent(slug), [
@@ -347,6 +387,105 @@ Keep this section.`);
       category: 'uncategorized',
       title: 'Legacy Post',
     });
+  });
+
+  it('does not merge hidden legacy locales into published localized rows', async () => {
+    // @ts-expect-error - the import script is a runtime-only helper.
+    const { importBlogDraftsIntoSqlite } = await import('../scripts/import-blog-md-to-sqlite.mjs');
+    const dir = createTempDatabasePath();
+    tempDirs.push(dir);
+    const dbPath = join(dir, 'blog.sqlite');
+    const db = new Database(dbPath);
+
+    db.exec(`
+      create table blog_posts (
+        id text primary key,
+        slug text not null,
+        locale text not null,
+        title text not null,
+        summary text not null,
+        category text not null,
+        hero_image text not null,
+        updated_at text not null,
+        tags_json text not null,
+        published integer not null,
+        status text not null,
+        series text,
+        body text not null
+      );
+      create unique index blog_posts_locale_slug_idx on blog_posts(locale, slug);
+    `);
+    const insert = db.prepare(`
+      insert into blog_posts (
+        id, slug, locale, title, summary, category, hero_image, updated_at, tags_json, published, status, series, body
+      ) values (
+        @id, @slug, @locale, @title, @summary, @category, @heroImage, @updatedAt, @tagsJson, @published, @status, @series, @body
+      )
+    `);
+    insert.run({
+      id: 'legacy-shared-zh',
+      slug: 'legacy-shared',
+      locale: 'zh',
+      title: 'Legacy Shared ZH',
+      summary: 'Published Chinese row.',
+      category: 'legacy',
+      heroImage: '/assets/blog/unraid-layout.svg',
+      updatedAt: '2026-05-24',
+      tagsJson: JSON.stringify(['Blog']),
+      published: 1,
+      status: 'published',
+      series: null,
+      body: '## Public zh body',
+    });
+    insert.run({
+      id: 'legacy-shared-en',
+      slug: 'legacy-shared',
+      locale: 'en',
+      title: 'Legacy Shared EN Draft',
+      summary: 'Draft English row.',
+      category: 'legacy',
+      heroImage: '/assets/blog/unraid-layout.svg',
+      updatedAt: '2026-05-24',
+      tagsJson: JSON.stringify(['Blog']),
+      published: 0,
+      status: 'draft',
+      series: null,
+      body: '## Hidden en body',
+    });
+    db.close();
+
+    importBlogDraftsIntoSqlite({ dbPath, sourceConfigs: [] });
+
+    const posts = readSqliteBlogPosts(dbPath);
+    expect(posts).toHaveLength(1);
+    expect(posts[0]).toMatchObject({
+      slug: 'legacy-shared',
+      locale: 'zh',
+      title: 'Legacy Shared ZH',
+    });
+
+    const migratedDb = new Database(dbPath);
+    const rows = migratedDb
+      .prepare('select group_id, published, status, slug_zh, slug_en from blog_posts order by group_id')
+      .all();
+    migratedDb.close();
+
+    expect(rows).toEqual([
+      {
+        group_id: 'legacy-shared',
+        published: 1,
+        status: 'published',
+        slug_zh: 'legacy-shared',
+        slug_en: null,
+      },
+      {
+        group_id: 'legacy-shared-en-hidden',
+        published: 0,
+        status: 'draft',
+        slug_zh: null,
+        slug_en: 'legacy-shared',
+      },
+    ]);
   });
 });
 

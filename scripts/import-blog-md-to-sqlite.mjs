@@ -229,7 +229,7 @@ function migrateLegacyBlogPosts(db) {
   `);
 
   upsertLocalizedRows(db, legacyRows.map((row) => toLocalizedImportRow({
-    groupId: row.slug,
+    groupId: getLegacyRowGroupId(row),
     locale: row.locale,
     slug: row.slug,
     title: row.title,
@@ -245,6 +245,15 @@ function migrateLegacyBlogPosts(db) {
   })));
 
   db.exec('drop table blog_posts_legacy;');
+}
+
+function getLegacyRowGroupId(row) {
+  if (isPublicLegacyRow(row)) return row.slug;
+  return `${row.slug}-${row.locale}-hidden`;
+}
+
+function isPublicLegacyRow(row) {
+  return Boolean(row.published) && row.status === 'published';
 }
 
 function readMarkdownFiles(dir) {

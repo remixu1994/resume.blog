@@ -28,6 +28,16 @@ const BLOG_SLUG_ALIASES: Record<string, string> = {
     'object-orientation-and-design-principles-encapsulation-inheritance-code-smells',
   '\u5de5\u7a0b\u534f\u4f5c\u4e0e\u4ea4\u4ed8-git-\u9700\u6c42\u5206\u6790\u4e0e\u4f30\u7b97':
     'engineering-collaboration-and-delivery-git-requirements-analysis-and-estimation',
+  'clr-and-csharp-type-system-objects-heap-and-garbage-collection':
+    'csharp-value-types-reference-types-and-object-semantics',
+  'thread-concurrency-and-synchronization-thread-costs-to-deadlock-governance':
+    'dotnet-thread-costs-threadpool-and-async-boundaries',
+  'dotnet-application-architecture-dependency-injection-mediatr-aop-and-resilience':
+    'aspnet-core-dependency-injection-lifetimes',
+  'service-communication-and-authentication-from-tcp-wcf-to-grpc-and-jwt':
+    'tcp-connection-lifecycle-handshake-and-teardown',
+  'dotnet-engineering-toolchain-cli-and-package-management-practices':
+    'dotnet-cli-daily-development-workflow',
 };
 
 export function resolveBlogSlug(slug: string) {
