@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseRecipeMarkdown } from '@devfolio-blog/markdown';
 import type { Locale, RecipeDetail, RecipeQuery, RecipeSummary } from '@devfolio-blog/shared-types';
@@ -9,7 +9,28 @@ type MdRecipeSource = {
   filePath: string;
 };
 
-const mdRecipes: MdRecipeSource[] = [{ slug: 'hairtail', locale: 'zh', filePath: 'public/recipes/hairtail.md' }];
+const RECIPES_DIR = join(process.cwd(), 'data', 'recipes');
+
+function scanRecipeFiles(): MdRecipeSource[] {
+  try {
+    const files = readdirSync(RECIPES_DIR).filter((file) => file.endsWith('.md'));
+    return files.map((file) => {
+      const filePath = join(RECIPES_DIR, file);
+      const markdown = readFileSync(filePath, 'utf8');
+      const recipe = parseRecipeMarkdown(markdown);
+      return {
+        slug: recipe.slug,
+        locale: recipe.locale,
+        filePath: join('data', 'recipes', file),
+      };
+    });
+  } catch {
+    // Directory doesn't exist or is empty
+    return [];
+  }
+}
+
+const mdRecipes: MdRecipeSource[] = scanRecipeFiles();
 
 export function listRecipes(query: RecipeQuery = {}): RecipeSummary[] {
   const locale = query.locale ?? 'zh';
