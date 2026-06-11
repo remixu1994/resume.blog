@@ -1,13 +1,46 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
+import { JsonLd } from '@/components/json-ld';
 import { getBlogCategoryLabel, getBlogDetailViewModel } from '@/content/site-content';
 import { MarkdownBody } from '@/lib/markdown';
 import { requireLocale } from '@/lib/locale';
 import { hasBlogSlugAlias, resolveBlogSlug } from '@/lib/blog/slug-aliases';
+import { buildArticleJsonLd, buildMetadata, getBlogAlternates } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
+  const { locale: localeParam, slug } = await params;
+  const locale = requireLocale(localeParam);
+  const normalizedSlug = resolveBlogSlug(decodeRouteSlug(slug));
+  const viewModel = getBlogDetailViewModel(locale, normalizedSlug);
+  if (!viewModel) {
+    return buildMetadata({
+      locale,
+      title: 'Blog post',
+      description: 'Blog post not found.',
+      path: `/${locale}/blog/${normalizedSlug}`,
+      noIndex: true,
+    });
+  }
+
+  return buildMetadata({
+    locale,
+    title: viewModel.item.title,
+    description: viewModel.item.summary,
+    path: `/${locale}/blog/${encodeURIComponent(normalizedSlug)}`,
+    alternatePaths: getBlogAlternates(locale, normalizedSlug),
+    imagePath: viewModel.item.heroImage,
+    type: 'article',
+    publishedTime: viewModel.item.updatedAt,
+    modifiedTime: viewModel.item.updatedAt,
+    keywords: viewModel.item.tags,
+    section: getBlogCategoryLabel(locale, viewModel.item.category),
+  });
+}
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   await connection();
@@ -24,6 +57,19 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ loc
 
   return (
     <article>
+      <JsonLd
+        data={buildArticleJsonLd({
+          locale,
+          title: viewModel.item.title,
+          description: viewModel.item.summary,
+          path: `/${locale}/blog/${encodeURIComponent(normalizedSlug)}`,
+          imagePath: viewModel.item.heroImage,
+          publishedTime: viewModel.item.updatedAt,
+          modifiedTime: viewModel.item.updatedAt,
+          keywords: viewModel.item.tags,
+          type: 'BlogPosting',
+        })}
+      />
       <header className="article-hero">
         <p className="eyebrow">
           {viewModel.item.updatedAt} / {getBlogCategoryLabel(locale, viewModel.item.category)}

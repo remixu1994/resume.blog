@@ -2,9 +2,14 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  compress: true,
+  poweredByHeader: false,
+  images: {
+    formats: ['image/avif', 'image/webp'],
+  },
   serverExternalPackages: ['better-sqlite3'],
-  eslint: {
-    ignoreDuringBuilds: true,
+  turbopack: {
+    root: process.cwd(),
   },
 };
 

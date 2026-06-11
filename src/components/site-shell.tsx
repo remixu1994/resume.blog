@@ -1,18 +1,20 @@
+'use client';
+
 import Link from 'next/link';
-import { getDictionary, getLocaleSwitch, getShellLinks } from '@/content/site-content';
+import { usePathname } from 'next/navigation';
+import { dictionaries, switchLocale, withLocalePath } from '@devfolio-blog/i18n';
 import type { Locale } from '@devfolio-blog/shared-types';
 
 export function SiteShell({
   locale,
-  currentPath,
   children,
 }: {
   locale: Locale;
-  currentPath: string;
   children: React.ReactNode;
 }) {
-  const dictionary = getDictionary(locale);
-  const localeSwitch = getLocaleSwitch(locale, currentPath);
+  const dictionary = dictionaries[locale];
+  const pathname = usePathname();
+  const localeSwitch = getLocaleSwitch(locale, pathname || `/${locale}`);
 
   return (
     <div className="site-shell">
@@ -36,4 +38,25 @@ export function SiteShell({
       <footer className="site-footer">{dictionary.footer}</footer>
     </div>
   );
+}
+
+function getShellLinks(locale: Locale) {
+  return [
+    { label: dictionaries[locale].nav.home, href: withLocalePath(locale) },
+    { label: dictionaries[locale].nav.resume, href: withLocalePath(locale, 'resume') },
+    { label: dictionaries[locale].nav.books, href: withLocalePath(locale, 'books') },
+    { label: dictionaries[locale].nav.recipes, href: withLocalePath(locale, 'recipes') },
+    { label: dictionaries[locale].nav.blog, href: withLocalePath(locale, 'blog') },
+  ];
+}
+
+function getLocaleSwitch(locale: Locale, currentPath: string) {
+  const nextLocale = switchLocale(locale);
+  const localizedPrefix = `/${locale}`;
+  const suffix = currentPath.startsWith(localizedPrefix) ? currentPath.slice(localizedPrefix.length) : '';
+
+  return {
+    label: nextLocale.toUpperCase(),
+    href: withLocalePath(nextLocale, suffix || ''),
+  };
 }

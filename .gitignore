@@ -40,3 +40,6 @@ next-env.d.ts
 # releaseops generated artifacts
 docs/releaseops/rollback-notes/*.md
 !docs/releaseops/rollback-notes/.gitkeep
+
+# hermes agent one company
+company/

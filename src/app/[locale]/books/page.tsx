@@ -1,5 +1,29 @@
+import Image from 'next/image';
+import type { Metadata } from 'next';
+import { JsonLd } from '@/components/json-ld';
 import { getBooksViewModel } from '@/content/site-content';
 import { requireLocale } from '@/lib/locale';
+import { buildCollectionPageJsonLd, buildMetadata } from '@/lib/seo';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale: localeParam } = await params;
+  const locale = requireLocale(localeParam);
+  const viewModel = getBooksViewModel(locale);
+  const imagePath = viewModel.selectedBooks.find((book) => book.coverImage)?.coverImage;
+
+  return buildMetadata({
+    locale,
+    title: viewModel.narrative.heroTitle,
+    description: viewModel.narrative.heroIntro,
+    path: `/${locale}/books`,
+    alternatePaths: {
+      zh: '/zh/books',
+      en: '/en/books',
+    },
+    imagePath,
+    keywords: ['books', 'engineering reading', 'architecture', 'refactoring'],
+  });
+}
 
 export default async function BooksPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: localeParam } = await params;
@@ -8,6 +32,14 @@ export default async function BooksPage({ params }: { params: Promise<{ locale: 
 
   return (
     <>
+      <JsonLd
+        data={buildCollectionPageJsonLd({
+          locale,
+          title: viewModel.narrative.heroTitle,
+          description: viewModel.narrative.heroIntro,
+          path: `/${locale}/books`,
+        })}
+      />
       <header className="article-hero shelf-hero books-proof-hero">
         <div>
           <h1 className="page-title">{viewModel.narrative.heroTitle}</h1>
@@ -42,7 +74,7 @@ export default async function BooksPage({ params }: { params: Promise<{ locale: 
                 <article className="proof-book-card" key={book.slug}>
                   {book.coverImage ? (
                     <div className="proof-book-cover">
-                      <img src={book.coverImage} alt={book.title} />
+                      <Image alt={book.title} height={480} sizes="150px" src={book.coverImage} width={320} />
                     </div>
                   ) : null}
                   <div className="proof-book-copy">

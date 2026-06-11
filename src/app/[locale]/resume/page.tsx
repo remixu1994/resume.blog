@@ -1,7 +1,29 @@
+import type { Metadata } from 'next';
 import type { ResumeExperience, ResumeProject } from '@devfolio-blog/shared-types';
+import { JsonLd } from '@/components/json-ld';
 import { ResumeProjectShowcase } from '@/components/resume-project-showcase';
 import { getResumeViewModel } from '@/content/site-content';
 import { requireLocale } from '@/lib/locale';
+import { buildArticleJsonLd, buildMetadata } from '@/lib/seo';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale: localeParam } = await params;
+  const locale = requireLocale(localeParam);
+  const { dictionary, resume } = getResumeViewModel(locale);
+
+  return buildMetadata({
+    locale,
+    title: dictionary.nav.resume,
+    description: resume.headline,
+    path: `/${locale}/resume`,
+    alternatePaths: {
+      zh: '/zh/resume',
+      en: '/en/resume',
+    },
+    type: 'profile',
+    keywords: ['resume', 'full-stack engineer', 'architecture', 'experience'],
+  });
+}
 
 export default async function ResumePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: localeParam } = await params;
@@ -16,6 +38,15 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
 
   return (
     <>
+      <JsonLd
+        data={buildArticleJsonLd({
+          locale,
+          title: dictionary.nav.resume,
+          description: resume.headline,
+          path: `/${locale}/resume`,
+          type: 'ProfilePage',
+        })}
+      />
       <header className="resume-hero">
         <div className="resume-hero-copy">
           <p className="eyebrow">{dictionary.resume.title}</p>

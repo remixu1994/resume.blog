@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import type {
   ResumeLabels,
@@ -11,6 +12,11 @@ type ShowcaseBlockGroup = {
   key: string;
   blocks: ResumeProjectShowcaseBlock[];
 };
+
+const SHOWCASE_IMAGE_DIMENSIONS = {
+  width: 1600,
+  height: 900,
+} as const;
 
 export function ResumeProjectShowcase({ project, labels }: { project: ResumeProject; labels: ResumeLabels }) {
   const showcase = project.showcase;
@@ -127,7 +133,15 @@ export function ResumeProjectShowcase({ project, labels }: { project: ResumeProj
                 onClick={() => setPreviewImage(null)}
               />
               <figure>
-                <img src={previewImage.src} alt={previewImage.alt} />
+                <Image
+                  alt={previewImage.alt}
+                  className="image-preview-media"
+                  height={SHOWCASE_IMAGE_DIMENSIONS.height}
+                  priority
+                  sizes="100vw"
+                  src={previewImage.src}
+                  width={SHOWCASE_IMAGE_DIMENSIONS.width}
+                />
                 <figcaption>{previewImage.alt}</figcaption>
                 <button className="button-muted" type="button" onClick={() => setPreviewImage(null)}>
                   Close
@@ -161,7 +175,13 @@ function ShowcaseBlock({
       </div>
       {block.imageSrc ? (
         <button className="showcase-image-button" type="button" onClick={() => onPreview({ src: block.imageSrc!, alt: imageAlt })}>
-          <img src={block.imageSrc} alt={imageAlt} />
+          <Image
+            alt={imageAlt}
+            height={SHOWCASE_IMAGE_DIMENSIONS.height}
+            sizes="(max-width: 980px) 100vw, 720px"
+            src={block.imageSrc}
+            width={SHOWCASE_IMAGE_DIMENSIONS.width}
+          />
           <span>{labels.openImage}</span>
         </button>
       ) : null}

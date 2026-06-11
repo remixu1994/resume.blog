@@ -1,11 +1,44 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { PostCard } from '@/components/cards';
+import { JsonLd } from '@/components/json-ld';
 import { getBlogListViewModel } from '@/content/site-content';
 import { requireLocale } from '@/lib/locale';
+import { buildCollectionPageJsonLd, buildMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ category?: string | string[] }>;
+}): Promise<Metadata> {
+  const { locale: localeParam } = await params;
+  const locale = requireLocale(localeParam);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const categoryParam = resolvedSearchParams?.category;
+  const category = typeof categoryParam === 'string' ? categoryParam : Array.isArray(categoryParam) ? categoryParam[0] : undefined;
+  const viewModel = getBlogListViewModel(locale, category?.trim() || undefined);
+  const title = category ? `${viewModel.dictionary.blog.title} · ${category}` : viewModel.dictionary.blog.title;
+
+  return buildMetadata({
+    locale,
+    title,
+    description: viewModel.dictionary.blog.intro,
+    path: category ? `/${locale}/blog?category=${encodeURIComponent(category)}` : `/${locale}/blog`,
+    alternatePaths: {
+      zh: '/zh/blog',
+      en: '/en/blog',
+    },
+    imagePath: viewModel.highlightedPost?.heroImage,
+    keywords: ['blog', 'engineering', 'architecture', category].filter((value): value is string => Boolean(value)),
+    noIndex: Boolean(category),
+  });
+}
 
 export default async function BlogPage({
   params,
@@ -31,6 +64,14 @@ export default async function BlogPage({
 
   return (
     <>
+      <JsonLd
+        data={buildCollectionPageJsonLd({
+          locale,
+          title: viewModel.dictionary.blog.title,
+          description: viewModel.dictionary.blog.intro,
+          path: `/${locale}/blog`,
+        })}
+      />
       <header className="article-hero">
         <p className="eyebrow">{viewModel.dictionary.nav.blog}</p>
         <h1 className="page-title">{viewModel.dictionary.blog.title}</h1>

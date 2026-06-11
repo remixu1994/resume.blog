@@ -1,9 +1,27 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import type { Locale } from '@devfolio-blog/shared-types';
+import { JsonLd } from '@/components/json-ld';
 import { getTopicViewModel } from '@/content/site-content';
 import { MarkdownBody } from '@/lib/markdown';
 import { requireLocale } from '@/lib/locale';
+import { buildTopicJsonLd, buildTopicMetadata } from '@/lib/seo';
 
-export function TopicPage(slug: string) {
+export function createTopicMetadata(slug: 'fitness-ai-agent' | 'unraid') {
+  return async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale: localeParam } = await params;
+    const locale = requireLocale(localeParam);
+    return (
+      buildTopicMetadata(locale, slug) ??
+      buildTopicMetadata(locale === 'zh' ? 'en' : 'zh', slug) ?? {
+        title: 'Topic',
+        description: 'Topic page not found.',
+      }
+    );
+  };
+}
+
+export function TopicPage(slug: 'fitness-ai-agent' | 'unraid') {
   return async function TopicRoutePage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale: localeParam } = await params;
     const locale = requireLocale(localeParam);
@@ -12,6 +30,7 @@ export function TopicPage(slug: string) {
 
     return (
       <article>
+        <JsonLd data={buildTopicJsonLd(locale as Locale, slug, viewModel.item)} />
         <header className="article-hero">
           <p className="eyebrow">{viewModel.item.eyebrow}</p>
           <h1 className="article-title">{viewModel.item.title}</h1>

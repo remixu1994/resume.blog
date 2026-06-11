@@ -1,10 +1,38 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { ArchitectureCard, PostCard, TopicCard } from '@/components/cards';
+import { JsonLd } from '@/components/json-ld';
 import { getHomeViewModel } from '@/content/site-content';
 import { requireLocale } from '@/lib/locale';
+import { buildCollectionPageJsonLd, buildMetadata, buildPersonJsonLd } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale: localeParam } = await params;
+  const locale = requireLocale(localeParam);
+  const viewModel = getHomeViewModel(locale);
+  const isZh = locale === 'zh';
+  const title = isZh ? '首页' : viewModel.dictionary.nav.home;
+  const description = isZh
+    ? '全栈工程、架构设计、稳定性交付与 AI 辅助工程实践。'
+    : viewModel.dictionary.home.heroBody;
+  const imagePath = viewModel.featured.featuredCases[0]?.heroImage;
+
+  return buildMetadata({
+    locale,
+    title,
+    description,
+    path: `/${locale}`,
+    alternatePaths: {
+      zh: '/zh',
+      en: '/en',
+    },
+    imagePath,
+    keywords: ['resume', 'blog', 'architecture', 'full-stack engineer'],
+  });
+}
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   await connection();
@@ -31,9 +59,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const contactCopy = isZh
     ? '项目案例、技术写作、PDF 简历与联系方式都集中在简历页，方便快速了解合作匹配度。'
     : 'Project cases, technical writing, PDF resume, and contact links are collected in the resume section.';
+  const description = isZh ? '全栈工程、架构设计、稳定性交付与 AI 辅助工程实践。' : viewModel.dictionary.home.heroBody;
 
   return (
     <>
+      <JsonLd data={buildPersonJsonLd(locale)} />
+      <JsonLd
+        data={buildCollectionPageJsonLd({
+          locale,
+          title: isZh ? '首页' : viewModel.dictionary.nav.home,
+          description,
+          path: `/${locale}`,
+        })}
+      />
       <section className="hero">
         <article className="hero-panel">
           <div>

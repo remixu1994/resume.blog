@@ -1,10 +1,50 @@
+import Image from 'next/image';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { JsonLd } from '@/components/json-ld';
 import { getDictionary } from '@/content/site-content';
-import { getRecipeBySlug, getRecipeSlugs } from '@/lib/recipes';
 import { requireLocale } from '@/lib/locale';
+import { getRecipeBySlug, getRecipeSlugs } from '@/lib/recipes';
+import { buildMetadata, buildRecipeJsonLd } from '@/lib/seo';
 
 export function generateStaticParams() {
   return getRecipeSlugs();
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
+  const { locale: localeParam, slug } = await params;
+  const locale = requireLocale(localeParam);
+  const recipe = getRecipeBySlug(slug, locale);
+  if (!recipe) {
+    return buildMetadata({
+      locale,
+      title: 'Recipe',
+      description: 'Recipe not found.',
+      path: `/${locale}/recipes/${slug}`,
+      noIndex: true,
+    });
+  }
+
+  const alternatePaths: Partial<Record<'zh' | 'en', string>> = {};
+  for (const candidate of ['zh', 'en'] as const) {
+    if (getRecipeBySlug(slug, candidate)) {
+      alternatePaths[candidate] = `/${candidate}/recipes/${slug}`;
+    }
+  }
+
+  return buildMetadata({
+    locale,
+    title: recipe.title,
+    description: recipe.summary,
+    path: `/${locale}/recipes/${slug}`,
+    alternatePaths,
+    imagePath: recipe.coverImage,
+    type: 'article',
+    publishedTime: recipe.updatedAt,
+    modifiedTime: recipe.updatedAt,
+    keywords: recipe.tags,
+    section: 'Recipes',
+  });
 }
 
 export default async function RecipeDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
@@ -17,6 +57,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ l
 
   return (
     <article className="recipe-detail">
+      <JsonLd data={buildRecipeJsonLd(locale, `/${locale}/recipes/${slug}`, recipe)} />
       <header className="article-hero recipe-detail-hero">
         <div className="recipe-detail-copy">
           <p className="eyebrow">{dictionary.nav.recipes}</p>
@@ -31,7 +72,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ l
         </div>
         {recipe.coverImage ? (
           <div className="recipe-detail-media">
-            <img src={recipe.coverImage} alt={recipe.title} />
+            <Image alt={recipe.title} height={800} sizes="(max-width: 980px) 100vw, 36vw" src={recipe.coverImage} width={1200} />
           </div>
         ) : null}
       </header>

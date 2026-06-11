@@ -15,9 +15,5 @@ export default async function LocaleLayout({
   const { locale: localeParam } = await params;
   const locale = requireLocale(localeParam);
 
-  return (
-    <SiteShell locale={locale} currentPath={`/${locale}`}>
-      {children}
-    </SiteShell>
-  );
+  return <SiteShell locale={locale}>{children}</SiteShell>;
 }
