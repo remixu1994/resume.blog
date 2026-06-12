@@ -91,13 +91,11 @@ resume.blog/
 ├── scripts/                    # Utility scripts
 │   ├── import-blog-md-to-sqlite.mjs  # Import markdown → SQLite
 │   ├── seed-blog-refinements.mjs     # Seed blog refinements
-│   ├── seed-dotnet-split-posts.mjs   # Seed .NET split posts
-│   └── releaseops-gate.mjs           # Release operations gate
+│   └── seed-dotnet-split-posts.mjs   # Seed .NET split posts
 ├── docs/                       # Project documentation
 │   ├── BRANCH-WORKFLOW.md      # Git branch & PR workflow
 │   ├── deployment.md           # Deployment config
 │   ├── plans/                  # Planning documents
-│   └── releaseops/             # Release operations
 ├── company/                    # Company/project meta docs
 │   ├── PROJECT.md              # Project vision & scope
 │   ├── ARCHITECTURE.md         # This document
@@ -251,7 +249,6 @@ All four must pass before merge. CI runs these automatically via GitHub Actions.
 | `npm run test` | Run Vitest tests |
 | `npm run blog:import` | Import markdown blog posts to SQLite |
 | `npm run blog:refine` | Seed blog refinements |
-| `npm run releaseops:gate` | Run release operations gate |
 
 ---
 
