@@ -34,6 +34,12 @@ export interface SiteDictionary {
     title: string;
     intro: string;
     empty: string;
+    searchPlaceholder: string;
+    searchLabel: string;
+    searchButton: string;
+    searchResults: string;
+    searchNoResults: string;
+    searchClear: string;
   };
   topic: {
     sections: string;
@@ -90,6 +96,12 @@ export const dictionaries: Record<Locale, SiteDictionary> = {
       title: '技术博客',
       intro: '围绕工程效率、系统交付、健身实践与 AI 工程化进行沉淀。',
       empty: '暂时还没有符合条件的文章。',
+      searchPlaceholder: '搜索文章...',
+      searchLabel: '搜索',
+      searchButton: '搜索',
+      searchResults: '搜索结果',
+      searchNoResults: '没有找到匹配的文章',
+      searchClear: '清除搜索',
     },
     topic: {
       sections: '专题章节',
@@ -144,6 +156,12 @@ export const dictionaries: Record<Locale, SiteDictionary> = {
       title: 'Technical Blog',
       intro: 'Notes on engineering efficiency, delivery quality, fitness practice, and AI engineering experiments.',
       empty: 'No published posts yet.',
+      searchPlaceholder: 'Search posts...',
+      searchLabel: 'Search',
+      searchButton: 'Search',
+      searchResults: 'Search Results',
+      searchNoResults: 'No matching posts found',
+      searchClear: 'Clear search',
     },
     topic: {
       sections: 'Topic sections',
