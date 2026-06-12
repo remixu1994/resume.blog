@@ -1,4 +1,5 @@
 import { SiteShell } from '@/components/site-shell';
+import { AnalyticsTracker } from '@/components/analytics-tracker';
 import { requireLocale } from '@/lib/locale';
 
 export function generateStaticParams() {
@@ -15,5 +16,10 @@ export default async function LocaleLayout({
   const { locale: localeParam } = await params;
   const locale = requireLocale(localeParam);
 
-  return <SiteShell locale={locale}>{children}</SiteShell>;
+  return (
+    <SiteShell locale={locale}>
+      {children}
+      <AnalyticsTracker locale={locale} />
+    </SiteShell>
+  );
 }
