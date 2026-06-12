@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
+  output: 'standalone',
   images: {
     formats: ['image/avif', 'image/webp'],
   },
