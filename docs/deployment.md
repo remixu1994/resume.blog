@@ -13,14 +13,6 @@ The project is configured for Vercel via `vercel.json` and expects a standard Ne
 Copy `.env.example` and set these values in Vercel Project Settings or your deployment environment:
 
 - `SITE_URL` — canonical production origin used by metadata, JSON-LD, `robots.txt`, and `sitemap.xml`
-- `RELEASEOPS_MIGRATIONS_CHECKED` — must be `true` before `npm run releaseops:gate`
-- `RELEASEOPS_HEALTHCHECK_URL` — deploy health endpoint used by the release gate
-
-Optional tuning values:
-
-- `RELEASEOPS_HEALTHCHECK_SAMPLES`
-- `RELEASEOPS_HEALTHCHECK_TIMEOUT_MS`
-- `RELEASEOPS_TEST_COMMAND`
 
 ## Local production check
 
@@ -48,7 +40,7 @@ Then verify:
 2. Set the environment variables from `.env.example`.
 3. Confirm `SITE_URL` matches the production domain.
 4. Trigger a preview deployment and smoke test metadata, sitemap, and 404 flows.
-5. Run `npm run releaseops:gate` against the production health endpoint before promoting.
+
 
 ## Notes
 

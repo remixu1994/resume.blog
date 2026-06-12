@@ -90,7 +90,6 @@ npm run lint             # ESLint 检查
 npm test                 # 运行测试
 npm run blog:import      # 导入博客到 SQLite
 npm run blog:refine      # 精炼博客数据
-npm run releaseops:gate  # ReleaseOps 门禁检查
 ```
 
 ## 文档
@@ -99,7 +98,6 @@ npm run releaseops:gate  # ReleaseOps 门禁检查
 - [架构设计](ARCHITECTURE.md)
 - [分支工作流](docs/BRANCH-WORKFLOW.md)
 - [部署指南](docs/deployment.md)
-- [ReleaseOps](docs/releaseops.md)
 
 ## License
 

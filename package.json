@@ -13,9 +13,7 @@
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
     "blog:import": "node ./scripts/import-blog-md-to-sqlite.mjs",
-    "blog:refine": "node ./scripts/seed-blog-refinements.mjs",
-    "releaseops:gate": "node ./scripts/releaseops-gate.mjs",
-    "releaseops:gate:ci": "npm run releaseops:gate"
+    "blog:refine": "node ./scripts/seed-blog-refinements.mjs"
   },
   "dependencies": {
     "@next/eslint-plugin-next": "^15.3.4",

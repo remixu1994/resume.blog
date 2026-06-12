@@ -43,3 +43,4 @@ docs/releaseops/rollback-notes/*.md
 
 # hermes agent one company
 company/
+.claude/settings.local.json
