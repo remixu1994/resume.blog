@@ -85,8 +85,10 @@ describe('seo helpers', () => {
       en: '/en/unraid',
       'x-default': '/zh/unraid',
     });
-    expect(metadata?.openGraph?.type).toBe('article');
-    expect(metadata?.openGraph?.images?.[0]).toMatchObject({
+    expect(metadata?.openGraph).toHaveProperty('type', 'article');
+    const ogImages = metadata?.openGraph?.images;
+    const firstImage = Array.isArray(ogImages) ? ogImages[0] : ogImages;
+    expect(firstImage).toMatchObject({
       url: 'https://resume.example.com/assets/topics/unraid.svg',
     });
   });
