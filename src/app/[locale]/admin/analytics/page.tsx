@@ -108,7 +108,7 @@ function DailyChart({ data }: { data: AnalyticsStats['dailyViews'] }) {
   );
 }
 
-function StatTable<T extends object>({
+function StatTable<T>({
   items,
   labelKey,
   valueKey,
