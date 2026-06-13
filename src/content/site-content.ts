@@ -17,6 +17,7 @@ import {
   getBlogTopics,
   listBlogPosts,
 } from '@/lib/blog/repository';
+import { searchBlogPosts } from '@/lib/blog/search';
 
 const selectedBookSlugs = [
   'refactoring',
@@ -337,6 +338,31 @@ export function getBlogListViewModel(locale: Locale, category?: string) {
     latestPosts: filteredItems.slice(1),
     topics: getBlogTopics(items),
     series: getBlogSeries(items),
+    categories: categories.map((item) => ({
+      ...item,
+      label: getBlogCategoryLabel(locale, item.name),
+      slug: item.name,
+      active: item.name === category,
+    })),
+    selectedCategory: category ?? null,
+  };
+}
+
+export function getBlogSearchViewModel(locale: Locale, query?: string, category?: string) {
+  const allPosts = listBlogPosts(locale);
+  const categories = getBlogCategories(allPosts);
+  const trimmedQuery = query?.trim() ?? '';
+  const results = trimmedQuery ? searchBlogPosts(trimmedQuery, locale) : [];
+  const filteredResults = category
+    ? results.filter((result) => result.category === category)
+    : results;
+
+  return {
+    dictionary: dictionaries[locale],
+    query: trimmedQuery,
+    results: filteredResults,
+    resultCount: filteredResults.length,
+    totalCount: allPosts.length,
     categories: categories.map((item) => ({
       ...item,
       label: getBlogCategoryLabel(locale, item.name),

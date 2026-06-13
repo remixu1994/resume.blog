@@ -112,6 +112,14 @@
     @apply border-t border-line py-8 pb-12 text-[0.92rem] text-muted;
   }
 
+  .footer-content {
+    @apply flex items-center justify-between;
+  }
+
+  .rss-link {
+    @apply inline-flex items-center gap-1 text-muted no-underline transition-colors hover:text-accent;
+  }
+
   .hero {
     @apply grid overflow-hidden rounded-lg border border-line bg-paper shadow-editorial;
     min-height: 600px;
@@ -488,6 +496,40 @@
 
   .blog-filter.is-active strong {
     @apply bg-white/15 text-white;
+  }
+
+  .blog-search-form {
+    @apply mb-6 flex items-center gap-3;
+  }
+
+  .blog-search-input {
+    @apply flex-1 min-h-10 rounded-md border border-line bg-white px-4 py-2 text-[0.88rem] text-ink focus:border-accent focus:outline-none;
+    box-shadow: none;
+  }
+
+  .blog-search-input::placeholder {
+    color: var(--muted);
+    opacity: 0.6;
+  }
+
+  .blog-search-input:focus {
+    box-shadow: 0 0 0 1px rgba(7, 95, 82, 0.3);
+  }
+
+  .blog-search-button {
+    @apply inline-flex min-h-10 items-center rounded-md border border-accent bg-accent px-5 py-2 text-[0.88rem] font-semibold text-white transition hover:bg-accent-strong;
+  }
+
+  .blog-search-clear {
+    @apply inline-flex min-h-10 items-center rounded-md border border-line bg-white px-4 py-2 text-[0.88rem] font-semibold text-muted transition hover:border-accent hover:text-accent;
+  }
+
+  .search-result mark {
+    @apply rounded bg-yellow-100 px-0.5 text-inherit;
+  }
+
+  .search-snippet {
+    @apply mt-1 text-[0.85rem] leading-relaxed text-muted;
   }
 
   .article-meta {

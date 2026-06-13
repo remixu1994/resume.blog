@@ -28,6 +28,15 @@ export const metadata: Metadata = {
   creator: 'Remi',
   publisher: 'Remi',
   keywords: ['full-stack engineer', 'architecture', 'resume', 'blog', 'self-hosting', 'AI engineering'],
+  alternates: {
+    types: {
+      'application/rss+xml': [
+        { url: '/feed.xml', title: 'Remi Resume (All)' },
+        { url: '/zh/feed.xml', title: 'Remi Resume (中文)' },
+        { url: '/en/feed.xml', title: 'Remi Resume (English)' },
+      ],
+    },
+  },
   openGraph: {
     type: 'website',
     title: 'Remi Resume',
