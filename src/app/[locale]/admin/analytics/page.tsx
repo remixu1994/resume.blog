@@ -108,15 +108,15 @@ function DailyChart({ data }: { data: AnalyticsStats['dailyViews'] }) {
   );
 }
 
-function StatTable({
+function StatTable<T>({
   items,
   labelKey,
   valueKey,
   emptyText,
 }: {
-  items: Record<string, string | number>[];
-  labelKey: string;
-  valueKey: string;
+  items: T[];
+  labelKey: keyof T & string;
+  valueKey: keyof T & string;
   emptyText: string;
 }) {
   if (items.length === 0) {
