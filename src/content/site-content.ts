@@ -38,8 +38,9 @@ const blogCategoryLabels: Record<
     'extreme-programming': '极限编程',
     architecture: '架构',
     'unraid-nas': 'Unraid Nas',
-    fundamentals: '\u57fa\u7840\u77e5\u8bc6\u6280\u80fd',
+    fundamentals: '基础知识技能',
     'dotnet-core': 'C# / .NET Core',
+    'ai-insights': 'AI 洞察',
     uncategorized: '未分类',
   },
   en: {
@@ -49,6 +50,7 @@ const blogCategoryLabels: Record<
     'unraid-nas': 'Unraid NAS',
     fundamentals: 'Fundamentals',
     'dotnet-core': 'C# / .NET Core',
+    'ai-insights': 'AI Insights',
     uncategorized: 'Uncategorized',
   },
 };
