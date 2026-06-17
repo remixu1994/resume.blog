@@ -32,6 +32,13 @@ const SOURCE_CONFIGS = [
     series: 'fundamentals',
     tags: ['基础知识', '算法', '编程基础'],
   },
+  {
+    dir: 'data/ai-insights',
+    category: 'ai-insights',
+    heroImage: '/assets/blog/ai-insights.svg',
+    series: 'ai-insights',
+    tags: ['AI', '人工智能', '洞察'],
+  },
 ];
 
 const SLUG_OVERRIDES = new Map([
