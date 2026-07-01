@@ -4,7 +4,7 @@
 - slug: jiang-niu-rou
 - locale: zh
 - category: balanced
-- tags: high-protein,slow-cook,meal-prep,chinese
+- tags: high-protein
 - servings: 6人份
 - durationMinutes: 960
 - difficulty: medium
