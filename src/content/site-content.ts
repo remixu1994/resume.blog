@@ -245,8 +245,8 @@ export function getShellLinks(locale: Locale) {
   ];
 }
 
-export function getHomeViewModel(locale: Locale) {
-  const posts = listBlogPosts(locale);
+export async function getHomeViewModel(locale: Locale) {
+  const posts = await listBlogPosts(locale);
 
   return {
     dictionary: dictionaries[locale],
@@ -327,8 +327,8 @@ export function getBlogCategoryLabel(locale: Locale, category: string) {
   return blogCategoryLabels[locale][category] ?? category;
 }
 
-export function getBlogListViewModel(locale: Locale, category?: string) {
-  const items = listBlogPosts(locale);
+export async function getBlogListViewModel(locale: Locale, category?: string) {
+  const items = await listBlogPosts(locale);
   const categories = getBlogCategories(items);
   const filteredItems = category ? items.filter((post) => post.category === category) : items;
 
@@ -350,11 +350,11 @@ export function getBlogListViewModel(locale: Locale, category?: string) {
   };
 }
 
-export function getBlogSearchViewModel(locale: Locale, query?: string, category?: string) {
-  const allPosts = listBlogPosts(locale);
+export async function getBlogSearchViewModel(locale: Locale, query?: string, category?: string) {
+  const allPosts = await listBlogPosts(locale);
   const categories = getBlogCategories(allPosts);
   const trimmedQuery = query?.trim() ?? '';
-  const results = trimmedQuery ? searchBlogPosts(trimmedQuery, locale) : [];
+  const results = trimmedQuery ? await searchBlogPosts(trimmedQuery, locale) : [];
   const filteredResults = category
     ? results.filter((result) => result.category === category)
     : results;
@@ -375,8 +375,8 @@ export function getBlogSearchViewModel(locale: Locale, query?: string, category?
   };
 }
 
-export function getBlogDetailViewModel(locale: Locale, slug: string) {
-  const post = getBlogPost(locale, slug);
+export async function getBlogDetailViewModel(locale: Locale, slug: string) {
+  const post = await getBlogPost(locale, slug);
 
   return post
     ? {

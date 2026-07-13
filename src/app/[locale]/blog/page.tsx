@@ -23,7 +23,7 @@ export async function generateMetadata({
   const category = typeof categoryParam === 'string' ? categoryParam : Array.isArray(categoryParam) ? categoryParam[0] : undefined;
   const qParam = resolvedSearchParams?.q;
   const query = typeof qParam === 'string' ? qParam : Array.isArray(qParam) ? qParam[0] : undefined;
-  const viewModel = getBlogListViewModel(locale, category?.trim() || undefined);
+  const viewModel = await getBlogListViewModel(locale, category?.trim() || undefined);
   const title = query
     ? `${viewModel.dictionary.blog.searchResults}: ${query}`
     : category
@@ -79,7 +79,7 @@ export default async function BlogPage({
 
   // If there's a search query, use search view model
   if (query?.trim()) {
-    const searchViewModel = getBlogSearchViewModel(locale, query, category?.trim() || undefined);
+    const searchViewModel = await getBlogSearchViewModel(locale, query, category?.trim() || undefined);
 
     return (
       <>
@@ -143,7 +143,7 @@ export default async function BlogPage({
   }
 
   // Default: show blog list with category filter
-  const viewModel = getBlogListViewModel(locale, category?.trim() || undefined);
+  const viewModel = await getBlogListViewModel(locale, category?.trim() || undefined);
 
   return (
     <>

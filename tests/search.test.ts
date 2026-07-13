@@ -29,84 +29,84 @@ function blogPost(overrides: Partial<BlogPost> = {}): BlogPost {
 }
 
 describe('searchBlogPosts', () => {
-  it('returns empty results for empty query', () => {
-    const results = searchBlogPosts('', 'zh', [sourceWithPosts([blogPost()])]);
+  it('returns empty results for empty query', async () => {
+    const results = await searchBlogPosts('', 'zh', [sourceWithPosts([blogPost()])]);
     expect(results).toEqual([]);
   });
 
-  it('returns empty results for whitespace-only query', () => {
-    const results = searchBlogPosts('   ', 'zh', [sourceWithPosts([blogPost()])]);
+  it('returns empty results for whitespace-only query', async () => {
+    const results = await searchBlogPosts('   ', 'zh', [sourceWithPosts([blogPost()])]);
     expect(results).toEqual([]);
   });
 
-  it('finds posts matching title', () => {
+  it('finds posts matching title', async () => {
     const source = sourceWithPosts([
       blogPost({ title: 'SQLite 数据库入门', slug: 'sqlite-intro' }),
       blogPost({ title: 'React 组件设计', slug: 'react-design', id: 'post2' }),
     ]);
 
-    const results = searchBlogPosts('SQLite', 'zh', [source]);
+    const results = await searchBlogPosts('SQLite', 'zh', [source]);
 
     expect(results).toHaveLength(1);
     expect(results[0].slug).toBe('sqlite-intro');
   });
 
-  it('finds posts matching summary', () => {
+  it('finds posts matching summary', async () => {
     const source = sourceWithPosts([
       blogPost({ summary: '深入理解微服务架构', slug: 'microservices' }),
       blogPost({ summary: '前端工程化实践', slug: 'frontend', id: 'post2' }),
     ]);
 
-    const results = searchBlogPosts('微服务', 'zh', [source]);
+    const results = await searchBlogPosts('微服务', 'zh', [source]);
 
     expect(results).toHaveLength(1);
     expect(results[0].slug).toBe('microservices');
   });
 
-  it('finds posts matching body content', () => {
+  it('finds posts matching body content', async () => {
     const source = sourceWithPosts([
       blogPost({ body: '## DDD 领域驱动设计\n\n领域驱动设计是一种...', slug: 'ddd' }),
       blogPost({ body: '## REST API 设计', slug: 'rest', id: 'post2' }),
     ]);
 
-    const results = searchBlogPosts('领域驱动', 'zh', [source]);
+    const results = await searchBlogPosts('领域驱动', 'zh', [source]);
 
     expect(results).toHaveLength(1);
     expect(results[0].slug).toBe('ddd');
   });
 
-  it('supports case-insensitive search', () => {
+  it('supports case-insensitive search', async () => {
     const source = sourceWithPosts([
       blogPost({ title: 'SQLite Database Guide', slug: 'sqlite', locale: 'en' }),
     ]);
 
-    const results = searchBlogPosts('sqlite', 'en', [source]);
+    const results = await searchBlogPosts('sqlite', 'en', [source]);
 
     expect(results).toHaveLength(1);
     expect(results[0].slug).toBe('sqlite');
   });
 
-  it('supports multi-term search (all terms must match)', () => {
+  it('supports multi-term search (all terms must match)', async () => {
     const source = sourceWithPosts([
       blogPost({ title: 'SQLite 数据库性能优化', slug: 'sqlite-perf' }),
       blogPost({ title: 'SQLite 入门教程', slug: 'sqlite-intro', id: 'post2' }),
       blogPost({ title: 'Redis 缓存设计', slug: 'redis', id: 'post3' }),
     ]);
 
-    const results = searchBlogPosts('SQLite 性能', 'zh', [source]);
+    const results = await searchBlogPosts('SQLite 性能', 'zh', [source]);
 
     expect(results).toHaveLength(1);
     expect(results[0].slug).toBe('sqlite-perf');
   });
 
-  it('filters by locale', () => {
+  it('filters by locale', async () => {
     const source = sourceWithPosts([
       blogPost({ title: '中文文章', slug: 'zh-post', locale: 'zh' }),
       blogPost({ title: 'English Post', slug: 'en-post', locale: 'en', id: 'post2' }),
     ]);
 
-    const zhResults = searchBlogPosts('文章', 'zh', [source]);
-    const enResults = searchBlogPosts('English', 'en', [source]);
+    const zhResults = await searchBlogPosts('文章', 'zh', [source]);
+    const enResults = await searchBlogPosts('English', 'en', [source]);
 
     expect(zhResults).toHaveLength(1);
     expect(zhResults[0].slug).toBe('zh-post');
@@ -114,39 +114,39 @@ describe('searchBlogPosts', () => {
     expect(enResults[0].slug).toBe('en-post');
   });
 
-  it('excludes unpublished and draft posts', () => {
+  it('excludes unpublished and draft posts', async () => {
     const source = sourceWithPosts([
       blogPost({ title: 'Published SQLite Post', slug: 'published' }),
       blogPost({ title: 'Draft SQLite Post', slug: 'draft', published: false, id: 'post2' }),
       blogPost({ title: 'Hidden SQLite Post', slug: 'hidden', status: 'draft', id: 'post3' }),
     ]);
 
-    const results = searchBlogPosts('SQLite', 'zh', [source]);
+    const results = await searchBlogPosts('SQLite', 'zh', [source]);
 
     expect(results).toHaveLength(1);
     expect(results[0].slug).toBe('published');
   });
 
-  it('sorts results by relevance (title > summary > body)', () => {
+  it('sorts results by relevance (title > summary > body)', async () => {
     const source = sourceWithPosts([
       blogPost({ title: '其他文章', summary: '包含 SQLite 的内容', body: '普通内容', slug: 'summary-match', id: 'post1' }),
       blogPost({ title: 'SQLite 完全指南', summary: '数据库教程', body: '普通内容', slug: 'title-match', id: 'post2' }),
       blogPost({ title: '其他文章', summary: '普通摘要', body: 'SQLite 相关内容', slug: 'body-match', id: 'post3' }),
     ]);
 
-    const results = searchBlogPosts('SQLite', 'zh', [source]);
+    const results = await searchBlogPosts('SQLite', 'zh', [source]);
 
     expect(results).toHaveLength(3);
     // Title match should rank first
     expect(results[0].slug).toBe('title-match');
   });
 
-  it('includes highlighted text in results', () => {
+  it('includes highlighted text in results', async () => {
     const source = sourceWithPosts([
       blogPost({ title: 'SQLite 数据库入门', slug: 'sqlite' }),
     ]);
 
-    const results = searchBlogPosts('SQLite', 'zh', [source]);
+    const results = await searchBlogPosts('SQLite', 'zh', [source]);
 
     expect(results).toHaveLength(1);
     expect(results[0].highlightedTitle).toContain('<mark>');
@@ -154,7 +154,7 @@ describe('searchBlogPosts', () => {
     expect(results[0].highlightedTitle).toContain('</mark>');
   });
 
-  it('returns correct result structure', () => {
+  it('returns correct result structure', async () => {
     const source = sourceWithPosts([
       blogPost({
         title: 'Test Post',
@@ -166,7 +166,7 @@ describe('searchBlogPosts', () => {
       }),
     ]);
 
-    const results = searchBlogPosts('Test', 'zh', [source]);
+    const results = await searchBlogPosts('Test', 'zh', [source]);
 
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({

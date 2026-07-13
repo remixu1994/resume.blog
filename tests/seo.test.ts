@@ -133,15 +133,15 @@ describe('seo helpers', () => {
     });
   });
 
-  it('builds sitemap entries for localized sections and content details', () => {
+  it('builds sitemap entries for localized sections and content details', async () => {
     process.env.SITE_URL = 'https://resume.example.com';
-    const entries = buildSitemapEntries();
+    const entries = await buildSitemapEntries();
 
     const urls = new Set(entries.map((entry: (typeof entries)[number]) => entry.url));
     const zhArchitecture = getArchitectureCases('zh')[0];
     const zhTopic = getTopicBySlug('zh', 'unraid');
     const zhRecipe = listRecipes({ locale: 'zh' })[0];
-    const zhPost = listBlogPosts('zh')[0];
+    const zhPost = (await listBlogPosts('zh'))[0];
 
     expect(urls.has('https://resume.example.com/')).toBe(true);
     expect(urls.has('https://resume.example.com/zh')).toBe(true);

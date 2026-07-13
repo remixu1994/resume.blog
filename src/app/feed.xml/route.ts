@@ -2,8 +2,8 @@ import { buildRssFeed } from '@/lib/rss';
 
 export const dynamic = 'force-static';
 
-export function GET() {
-  const xml = buildRssFeed();
+export async function GET() {
+  const xml = await buildRssFeed();
 
   return new Response(xml, {
     headers: {

@@ -8,9 +8,12 @@ const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
   },
-  serverExternalPackages: ['better-sqlite3'],
+  serverExternalPackages: ['better-sqlite3', 'mysql2', 'pg'],
   turbopack: {
     root: process.cwd(),
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 };
 

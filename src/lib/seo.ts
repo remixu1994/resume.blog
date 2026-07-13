@@ -98,7 +98,7 @@ export function buildMetadata({
   };
 }
 
-export function buildSitemapEntries(): MetadataRoute.Sitemap {
+export async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   const staticEntries = [
     '/',
     '/zh',
@@ -148,12 +148,16 @@ export function buildSitemapEntries(): MetadataRoute.Sitemap {
     };
   });
 
-  const blogEntries = locales.flatMap((locale) =>
-    listBlogPosts(locale).map((post) => ({
-      url: getSiteUrl(`/${locale}/blog/${post.slug}`),
-      lastModified: post.updatedAt,
-    })),
-  );
+  const blogEntries = (
+    await Promise.all(
+      locales.map(async (locale) =>
+        (await listBlogPosts(locale)).map((post) => ({
+          url: getSiteUrl(`/${locale}/blog/${post.slug}`),
+          lastModified: post.updatedAt,
+        })),
+      ),
+    )
+  ).flat();
 
   return dedupeEntries([...staticEntries, ...architectureEntries, ...topicEntries, ...recipeEntries, ...blogEntries]);
 }

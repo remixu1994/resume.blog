@@ -13,7 +13,7 @@ export async function GET(
 ) {
   const { locale: localeParam } = await params;
   const locale = requireLocale(localeParam);
-  const xml = buildRssFeed(locale);
+  const xml = await buildRssFeed(locale);
 
   return new Response(xml, {
     headers: {

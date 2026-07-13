@@ -47,6 +47,386 @@
 }
 
 @layer components {
+  .admin-login-page {
+    @apply grid min-h-screen place-items-center bg-[#eef1f0] px-5 py-10;
+  }
+
+  .admin-login-panel {
+    @apply grid w-full max-w-[420px] gap-8 rounded-md border border-[#d7ddda] bg-white p-8 shadow-editorial;
+  }
+
+  .admin-login-heading p,
+  .admin-page-head p,
+  .admin-editor-head p {
+    @apply m-0 font-mono text-[0.7rem] uppercase text-accent;
+  }
+
+  .admin-login-heading h1,
+  .admin-page-head h1,
+  .admin-editor-head h1 {
+    @apply m-0 mt-2 font-sans text-[1.75rem] font-semibold tracking-normal;
+  }
+
+  .admin-login-heading span,
+  .admin-page-head span {
+    @apply mt-2 block text-sm text-muted;
+  }
+
+  .admin-login-form,
+  .admin-field {
+    @apply grid gap-3;
+  }
+
+  .admin-field > span:first-child,
+  .admin-editor-meta label > span:first-child,
+  .admin-copy-fields label > span:first-child {
+    @apply text-xs font-semibold text-[#46514e];
+  }
+
+  .admin-input-wrap {
+    @apply flex min-h-11 items-center gap-3 rounded-md border border-[#cfd7d4] bg-white px-3 text-muted transition-colors;
+  }
+
+  .admin-input-wrap:focus-within {
+    @apply border-accent text-accent;
+    box-shadow: 0 0 0 3px rgba(7, 95, 82, 0.1);
+  }
+
+  .admin-input-wrap input {
+    @apply min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-ink outline-none;
+  }
+
+  .admin-primary-action,
+  .admin-editor-actions button,
+  .admin-upload-action {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-[#cfd7d4] bg-white px-4 text-sm font-semibold transition;
+  }
+
+  .admin-primary-action,
+  .admin-editor-actions .is-primary {
+    @apply border-accent bg-accent text-white;
+  }
+
+  .admin-primary-action:hover,
+  .admin-editor-actions .is-primary:hover {
+    @apply border-accent-strong bg-accent-strong;
+  }
+
+  .admin-primary-action:disabled,
+  .admin-editor-actions button:disabled,
+  .admin-upload-action:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+
+  .admin-error {
+    @apply m-0 rounded-md border border-[#e6b8aa] bg-[#fff4f0] px-3 py-2 text-sm text-[#8d351c];
+  }
+
+  .admin-shell {
+    @apply grid min-h-screen bg-[#f4f6f5];
+    grid-template-columns: 236px minmax(0, 1fr);
+  }
+
+  .admin-sidebar {
+    @apply sticky top-0 flex h-screen flex-col border-r border-[#dce2df] bg-[#f9faf9] p-5;
+  }
+
+  .admin-brand {
+    @apply flex items-center gap-3 border-b border-[#dce2df] pb-5 text-accent-strong;
+  }
+
+  .admin-brand div {
+    @apply grid gap-0.5;
+  }
+
+  .admin-brand strong {
+    @apply text-sm font-bold;
+  }
+
+  .admin-brand span {
+    @apply text-xs text-muted;
+  }
+
+  .admin-nav {
+    @apply mt-5 grid gap-1;
+  }
+
+  .admin-nav a {
+    @apply flex min-h-10 items-center gap-3 rounded-md px-3 text-sm font-medium text-muted transition-colors;
+  }
+
+  .admin-nav a:hover,
+  .admin-nav a.is-active {
+    @apply bg-accent-soft text-accent-strong;
+  }
+
+  .admin-account {
+    @apply mt-auto flex items-center justify-between border-t border-[#dce2df] pt-4 text-sm text-muted;
+  }
+
+  .admin-account button,
+  .admin-hero-field button {
+    @apply grid size-9 place-items-center rounded-md border border-[#cfd7d4] bg-white text-muted transition-colors;
+  }
+
+  .admin-account button:hover,
+  .admin-hero-field button:hover {
+    @apply border-accent text-accent;
+  }
+
+  .admin-workspace {
+    @apply min-w-0 px-8 py-7;
+  }
+
+  .admin-page-head,
+  .admin-editor-head {
+    @apply flex items-start justify-between gap-6 border-b border-[#d7ddda] pb-6;
+  }
+
+  .admin-post-table {
+    @apply mt-6 overflow-hidden rounded-md border border-[#d7ddda] bg-white;
+  }
+
+  .admin-post-row {
+    @apply grid min-h-[72px] items-center gap-4 border-b border-[#e3e7e5] px-5 text-sm text-muted transition-colors;
+    grid-template-columns: minmax(240px, 1fr) 130px 120px 20px;
+  }
+
+  .admin-post-row:last-child {
+    @apply border-b-0;
+  }
+
+  .admin-post-row:not(.admin-post-row-head):hover {
+    @apply bg-[#f8faf9] text-ink;
+  }
+
+  .admin-post-row-head {
+    @apply min-h-11 bg-[#f4f6f5] text-xs font-semibold uppercase text-muted;
+  }
+
+  .admin-post-title {
+    @apply grid min-w-0 gap-1;
+  }
+
+  .admin-post-title strong,
+  .admin-post-title small {
+    @apply overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+
+  .admin-post-title strong {
+    @apply text-sm text-ink;
+  }
+
+  .admin-post-title small {
+    @apply font-mono text-[0.7rem] text-muted;
+  }
+
+  .admin-status {
+    @apply inline-flex w-fit items-center gap-1.5 rounded-full bg-[#eef0ef] px-2.5 py-1 text-xs font-semibold text-muted;
+  }
+
+  .admin-status.is-published {
+    @apply bg-accent-soft text-accent;
+  }
+
+  .admin-empty {
+    @apply px-6 py-16 text-center text-sm text-muted;
+  }
+
+  .admin-editor {
+    @apply mx-auto max-w-[1540px];
+  }
+
+  .admin-editor-head h1 {
+    @apply max-w-[760px] overflow-hidden text-ellipsis whitespace-nowrap text-[1.45rem];
+  }
+
+  .admin-editor-actions {
+    @apply flex flex-wrap justify-end gap-2;
+  }
+
+  .admin-editor-notice {
+    @apply mt-2 inline-flex items-center gap-1.5 text-xs text-muted;
+  }
+
+  .admin-editor-notice.is-success {
+    @apply text-accent;
+  }
+
+  .admin-editor-notice.is-error {
+    @apply text-[#9a351e];
+  }
+
+  .admin-editor-meta {
+    @apply grid gap-4 border-b border-[#d7ddda] py-5;
+    grid-template-columns: minmax(140px, 0.7fr) minmax(140px, 0.7fr) minmax(220px, 1fr) minmax(280px, 1.4fr);
+  }
+
+  .admin-editor-meta label,
+  .admin-copy-fields label {
+    @apply grid min-w-0 gap-2;
+  }
+
+  .admin-editor-meta input,
+  .admin-copy-fields input,
+  .admin-copy-fields textarea {
+    @apply w-full rounded-md border border-[#cfd7d4] bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors;
+  }
+
+  .admin-editor-meta input:focus,
+  .admin-copy-fields input:focus,
+  .admin-copy-fields textarea:focus {
+    @apply border-accent;
+    box-shadow: 0 0 0 3px rgba(7, 95, 82, 0.08);
+  }
+
+  .admin-hero-field > span:last-child {
+    @apply flex min-w-0 gap-2;
+  }
+
+  .admin-hero-field input {
+    @apply min-w-0 flex-1;
+  }
+
+  .admin-language-tabs {
+    @apply flex gap-1 border-b border-[#d7ddda] pt-5;
+  }
+
+  .admin-language-tabs button {
+    @apply flex min-h-11 items-center gap-3 border-b-2 border-transparent px-4 text-sm font-semibold text-muted transition-colors;
+  }
+
+  .admin-language-tabs button.is-active {
+    @apply border-accent text-accent;
+  }
+
+  .admin-language-tabs small {
+    @apply rounded-full bg-[#e8ebea] px-2 py-0.5 text-[0.68rem] font-medium;
+  }
+
+  .admin-language-tabs button.is-active small {
+    @apply bg-accent-soft;
+  }
+
+  .admin-content-fields {
+    @apply grid min-h-[680px] bg-white;
+    grid-template-columns: minmax(0, 1fr) minmax(380px, 0.92fr);
+  }
+
+  .admin-copy-fields {
+    @apply grid content-start gap-4 border-l border-b border-[#d7ddda] p-5;
+  }
+
+  .admin-body-field textarea {
+    @apply min-h-[390px] resize-y font-mono text-[0.82rem] leading-6;
+  }
+
+  .admin-upload-action {
+    @apply w-fit text-accent;
+  }
+
+  .admin-preview-pane {
+    @apply min-w-0 border-x border-b border-[#d7ddda] bg-[#fbfcfb];
+  }
+
+  .admin-preview-head {
+    @apply flex min-h-12 items-center gap-2 border-b border-[#d7ddda] px-5 text-xs font-semibold text-muted;
+  }
+
+  .admin-preview-head svg:last-child {
+    @apply ml-auto;
+  }
+
+  .admin-preview-pane .markdown-body {
+    @apply max-h-[720px] overflow-auto p-6;
+  }
+
+  .admin-file-input {
+    @apply hidden;
+  }
+
+  @media (max-width: 1100px) {
+    .admin-editor-meta {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-content-fields {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-preview-pane {
+      @apply border-t-0;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .admin-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-sidebar {
+      @apply static h-auto flex-row items-center gap-4 border-r-0 border-b px-4 py-3;
+    }
+
+    .admin-brand {
+      @apply border-b-0 pb-0;
+    }
+
+    .admin-brand span,
+    .admin-nav a span {
+      @apply hidden;
+    }
+
+    .admin-nav {
+      @apply ml-auto mt-0 flex;
+    }
+
+    .admin-nav a {
+      @apply px-2;
+    }
+
+    .admin-account {
+      @apply mt-0 border-t-0 pt-0;
+    }
+
+    .admin-account > span {
+      @apply hidden;
+    }
+
+    .admin-workspace {
+      @apply px-4 py-5;
+    }
+
+    .admin-page-head,
+    .admin-editor-head {
+      @apply flex-col;
+    }
+
+    .admin-editor-actions {
+      @apply w-full justify-start;
+    }
+
+    .admin-post-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .admin-post-row > :nth-child(3),
+    .admin-post-row > :nth-child(4),
+    .admin-post-row-head {
+      @apply hidden;
+    }
+
+    .admin-editor-meta {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-content-fields {
+      min-height: 0;
+    }
+  }
+}
+
+@layer components {
   .site-shell {
     @apply min-h-screen;
   }

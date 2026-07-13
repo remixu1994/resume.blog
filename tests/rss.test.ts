@@ -57,8 +57,8 @@ vi.mock('@/lib/blog/repository', () => ({
 }));
 
 describe('rss feed generation', () => {
-  it('generates a valid RSS 2.0 XML structure', () => {
-    const xml = buildRssFeed('zh');
+  it('generates a valid RSS 2.0 XML structure', async () => {
+    const xml = await buildRssFeed('zh');
 
     expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
     expect(xml).toContain('<rss version="2.0"');
@@ -68,8 +68,8 @@ describe('rss feed generation', () => {
     expect(xml).toContain('xmlns:atom="http://www.w3.org/2005/Atom"');
   });
 
-  it('includes feed metadata for a locale-specific feed', () => {
-    const xml = buildRssFeed('zh');
+  it('includes feed metadata for a locale-specific feed', async () => {
+    const xml = await buildRssFeed('zh');
 
     expect(xml).toContain('<title>Remi Resume Blog (ZH)</title>');
     expect(xml).toContain('<language>zh-cn</language>');
@@ -77,16 +77,16 @@ describe('rss feed generation', () => {
     expect(xml).toContain('/zh/feed.xml');
   });
 
-  it('includes all published posts for the requested locale', () => {
-    const xml = buildRssFeed('zh');
+  it('includes all published posts for the requested locale', async () => {
+    const xml = await buildRssFeed('zh');
 
     expect(xml).toContain('中文文章标题');
     expect(xml).toContain('第二篇文章');
     expect(xml).not.toContain('English Post Title');
   });
 
-  it('generates a combined feed with all locales when no locale is specified', () => {
-    const xml = buildRssFeed();
+  it('generates a combined feed with all locales when no locale is specified', async () => {
+    const xml = await buildRssFeed();
 
     expect(xml).toContain('中文文章标题');
     expect(xml).toContain('第二篇文章');
@@ -95,8 +95,8 @@ describe('rss feed generation', () => {
     expect(xml).toContain('/feed.xml');
   });
 
-  it('sorts posts by updatedAt descending', () => {
-    const xml = buildRssFeed('zh');
+  it('sorts posts by updatedAt descending', async () => {
+    const xml = await buildRssFeed('zh');
     const firstItemIndex = xml.indexOf('<item>');
     const secondItemIndex = xml.indexOf('<item>', firstItemIndex + 1);
 
@@ -108,9 +108,9 @@ describe('rss feed generation', () => {
     expect(secondTitle).toContain('第二篇文章');
   });
 
-  it('includes post links with full absolute URLs', () => {
+  it('includes post links with full absolute URLs', async () => {
     process.env.SITE_URL = 'https://resume.example.com';
-    const xml = buildRssFeed('zh');
+    const xml = await buildRssFeed('zh');
 
     expect(xml).toContain('https://resume.example.com/zh/blog/zh-post-one');
     expect(xml).toContain('https://resume.example.com/zh/blog/zh-post-two');
@@ -118,30 +118,30 @@ describe('rss feed generation', () => {
     delete process.env.SITE_URL;
   });
 
-  it('includes category in each item', () => {
-    const xml = buildRssFeed('zh');
+  it('includes category in each item', async () => {
+    const xml = await buildRssFeed('zh');
 
     expect(xml).toContain('<category>architecture</category>');
     expect(xml).toContain('<category>fundamentals</category>');
   });
 
-  it('escapes XML special characters in post content', () => {
-    const xml = buildRssFeed('en');
+  it('escapes XML special characters in post content', async () => {
+    const xml = await buildRssFeed('en');
 
     // The summary & title should not have raw < > & characters
     expect(xml).not.toMatch(/<title>[^<]*&[^<]*<\/title>/);
     expect(xml).not.toMatch(/<description>[^<]*&[^<]*<\/description>/);
   });
 
-  it('uses RFC 822 date format for pubDate', () => {
-    const xml = buildRssFeed('en');
+  it('uses RFC 822 date format for pubDate', async () => {
+    const xml = await buildRssFeed('en');
 
     // RFC 822 format: "Sat, 02 Jun 2026 00:00:00 GMT"
     expect(xml).toMatch(/<pubDate>\w{3}, \d{2} \w{3} \d{4} \d{2}:\d{2}:\d{2} GMT<\/pubDate>/);
   });
 
-  it('includes guid as permalink for each item', () => {
-    const xml = buildRssFeed('en');
+  it('includes guid as permalink for each item', async () => {
+    const xml = await buildRssFeed('en');
 
     expect(xml).toContain('isPermaLink="true"');
     expect(xml).toContain('<guid');

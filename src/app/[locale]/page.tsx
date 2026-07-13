@@ -8,6 +8,7 @@ import { requireLocale } from '@/lib/locale';
 import { buildCollectionPageJsonLd, buildMetadata, buildPersonJsonLd } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale: localeParam } = await params;
@@ -38,7 +39,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   await connection();
   const { locale: localeParam } = await params;
   const locale = requireLocale(localeParam);
-  const viewModel = getHomeViewModel(locale);
+  const viewModel = await getHomeViewModel(locale);
   const isZh = locale === 'zh';
   const heroTitle = isZh ? '让业务系统稳定交付、持续演进' : viewModel.dictionary.home.heroTitle;
   const heroBody = isZh

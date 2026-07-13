@@ -1,4 +1,5 @@
 import { Marked } from 'marked';
+import sanitizeHtml from 'sanitize-html';
 import type {
   Locale,
   RecipeCategory,
@@ -13,6 +14,9 @@ const markdownParser = new Marked({
   breaks: false,
   gfm: true,
   renderer: {
+    html({ text }) {
+      return escapeHtml(text);
+    },
     code({ text, lang }) {
       const language = normalizeCodeLanguage(lang);
       const escapedCode = escapeHtml(text);
@@ -36,7 +40,23 @@ const markdownParser = new Marked({
 });
 
 export function renderMarkdown(markdown: string): string {
-  return markdownParser.parse(normalizeMarkdown(markdown), { async: false });
+  const rendered = markdownParser.parse(normalizeMarkdown(markdown), { async: false });
+  return sanitizeHtml(rendered, {
+    allowedTags: [...sanitizeHtml.defaults.allowedTags, 'figure', 'figcaption', 'button', 'img'],
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      a: ['href', 'name', 'target', 'rel', 'title'],
+      img: ['src', 'alt', 'title', 'loading'],
+      figure: ['class', 'data-code-block', 'data-mermaid-block'],
+      figcaption: ['class'],
+      pre: ['class', 'data-mermaid'],
+      code: ['class', 'data-code'],
+      span: ['class'],
+      button: ['class', 'type', 'data-copy-code', 'aria-label'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto'],
+    allowProtocolRelative: false,
+  });
 }
 
 function normalizeMarkdown(markdown: string): string {
