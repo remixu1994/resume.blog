@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, type RefinementCtx } from 'zod';
 
 const slugSchema = z.string().trim().max(180).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase words separated by hyphens.');
 const tagIdSchema = z.string().trim().min(1).max(80).regex(/^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u);
@@ -19,7 +19,20 @@ export const adminBlogPostInputSchema = z.object({
   en: localizedDraftSchema,
 });
 
-export const publishBlogPostInputSchema = adminBlogPostInputSchema.superRefine((value, context) => {
+export const publishBlogPostInputSchema = adminBlogPostInputSchema.superRefine(addPublishIssues);
+
+export const externalBlogPostInputSchema = adminBlogPostInputSchema.extend({
+  status: z.enum(['draft', 'published']).default('draft'),
+}).superRefine((value, context) => {
+  if (value.status === 'published') addPublishIssues(value, context);
+});
+
+export const idempotencyKeySchema = z.string()
+  .min(8)
+  .max(128)
+  .regex(/^[A-Za-z0-9][A-Za-z0-9._:-]*$/, 'Use letters, numbers, dots, underscores, colons, or hyphens.');
+
+function addPublishIssues(value: AdminBlogPostInput, context: RefinementCtx) {
   for (const locale of ['zh', 'en'] as const) {
     const content = value[locale];
     for (const [field, fieldValue] of [
@@ -32,7 +45,7 @@ export const publishBlogPostInputSchema = adminBlogPostInputSchema.superRefine((
       if (!result.success) context.addIssue({ code: 'custom', path: [locale, 'slug'], message: result.error.issues[0]?.message || 'Invalid slug.' });
     }
   }
-});
+}
 
 export const loginInputSchema = z.object({
   username: z.string().min(1).max(200),
@@ -46,6 +59,7 @@ export const assetUploadInputSchema = z.object({
 });
 
 export type AdminBlogPostInput = z.infer<typeof adminBlogPostInputSchema>;
+export type ExternalBlogPostInput = z.infer<typeof externalBlogPostInputSchema>;
 
 export interface AdminBlogPost extends AdminBlogPostInput {
   id: string;

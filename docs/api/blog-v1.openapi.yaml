@@ -1,0 +1,212 @@
+openapi: 3.1.0
+info:
+  title: Resume Blog Write API
+  version: 1.0.0
+  description: Server-to-server API for creating bilingual blog drafts or published posts.
+paths:
+  /api/v1/blog/posts:
+    post:
+      operationId: createBlogPost
+      summary: Create a blog post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: A globally unique key retained for safe retries.
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+            pattern: '^[A-Za-z0-9][A-Za-z0-9._:-]*$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBlogPostRequest'
+      responses:
+        '201':
+          description: Blog post created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostResponse'
+        '200':
+          description: A previous successful request was replayed.
+          headers:
+            Idempotency-Replayed:
+              schema:
+                type: string
+                const: 'true'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostResponse'
+        '400':
+          description: Invalid JSON, fields, idempotency key, or image asset.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Missing or invalid Bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Idempotency key or slug conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: API token configuration or PostgreSQL is unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque-token
+  schemas:
+    LocalizedBlogContent:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 180
+        title:
+          type: string
+          maxLength: 240
+        summary:
+          type: string
+          maxLength: 600
+        body:
+          type: string
+          maxLength: 200000
+    CreateBlogPostRequest:
+      type: object
+      required: [zh, en]
+      properties:
+        status:
+          type: string
+          enum: [draft, published]
+          default: draft
+        category:
+          type: string
+          minLength: 1
+          maxLength: 100
+          default: uncategorized
+        heroImage:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          default: /assets/blog/nx-monorepo.svg
+        tagIds:
+          type: array
+          maxItems: 20
+          uniqueItems: true
+          items:
+            type: string
+            maxLength: 80
+        series:
+          type: string
+          maxLength: 120
+        zh:
+          $ref: '#/components/schemas/LocalizedBlogContent'
+        en:
+          $ref: '#/components/schemas/LocalizedBlogContent'
+      allOf:
+        - if:
+            properties:
+              status:
+                const: published
+            required: [status]
+          then:
+            properties:
+              zh:
+                $ref: '#/components/schemas/PublishableLocalizedBlogContent'
+              en:
+                $ref: '#/components/schemas/PublishableLocalizedBlogContent'
+    PublishableLocalizedBlogContent:
+      allOf:
+        - $ref: '#/components/schemas/LocalizedBlogContent'
+        - type: object
+          required: [slug, title, summary, body]
+          properties:
+            slug:
+              type: string
+              minLength: 1
+              pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+            title:
+              type: string
+              minLength: 1
+            summary:
+              type: string
+              minLength: 1
+            body:
+              type: string
+              minLength: 1
+    AdminBlogPost:
+      allOf:
+        - $ref: '#/components/schemas/CreateBlogPostRequest'
+        - type: object
+          required: [id, groupId, published, status, createdAt, updatedAt, publishedAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+            groupId:
+              type: string
+              format: uuid
+            published:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+            publishedAt:
+              oneOf:
+                - type: string
+                  format: date-time
+                - type: 'null'
+    BlogPostResponse:
+      type: object
+      required: [item]
+      properties:
+        item:
+          $ref: '#/components/schemas/AdminBlogPost'
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum:
+                - INVALID_JSON
+                - VALIDATION_ERROR
+                - INVALID_ASSET
+                - IDEMPOTENCY_CONFLICT
+                - SLUG_CONFLICT
+                - UNAUTHORIZED
+                - SERVICE_UNAVAILABLE
+                - INTERNAL_ERROR
+            message:
+              type: string
+            fields:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string

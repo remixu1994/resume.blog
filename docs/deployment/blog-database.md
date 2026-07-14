@@ -52,7 +52,18 @@ ADMIN_USERNAME=admin
 ADMIN_PASSWORD=replace-with-a-strong-password
 ADMIN_SESSION_SECRET=replace-with-at-least-32-random-characters
 ADMIN_APP_URL=https://example.com
+ADMIN_API_TOKENS=replace-with-a-random-api-token-at-least-32-characters
 ```
+
+`ADMIN_API_TOKENS` enables the server-to-server `POST /api/v1/blog/posts` endpoint. Multiple comma-separated tokens support rotation without downtime. Each token must contain at least 32 characters. This API uses Bearer authentication rather than the admin Cookie, and every request requires an `Idempotency-Key`.
+
+Run the schema migration after deploying a version that includes the external API. Migration `003_external_blog_api` creates the durable idempotency table:
+
+```bash
+npm run blog:db:migrate
+```
+
+See `docs/api/external-blog-create.md` and `docs/api/blog-v1.openapi.yaml` for the request contract and examples.
 
 Run `npm run blog:db:migrate` after deployment to apply the versioned blog schema. To import the existing SQLite content, run `npm run blog:db:import-sqlite` from a trusted machine with access to both databases.
 

@@ -56,6 +56,18 @@ const migrations = [
       'create index if not exists blog_assets_status_idx on blog_assets(status, created_at desc)',
     ],
   },
+  {
+    id: '003_external_blog_api',
+    statements: [
+      `create table if not exists blog_api_idempotency (
+        idempotency_key varchar(128) primary key,
+        request_hash char(64) not null,
+        post_id text not null references blog_posts(id) on delete cascade,
+        created_at timestamptz not null default now()
+      )`,
+      'create index if not exists blog_api_idempotency_created_at_idx on blog_api_idempotency(created_at desc)',
+    ],
+  },
 ];
 
 const pool = new Pool({ connectionString: url, max: 1 });

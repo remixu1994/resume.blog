@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { adminBlogPostInputSchema, publishBlogPostInputSchema } from '@/lib/blog/admin-schema';
+import {
+  adminBlogPostInputSchema,
+  externalBlogPostInputSchema,
+  idempotencyKeySchema,
+  publishBlogPostInputSchema,
+} from '@/lib/blog/admin-schema';
 
 const completeInput = {
   category: 'architecture',
@@ -33,5 +38,24 @@ describe('admin blog validation', () => {
   it('rejects non-canonical publish slugs', () => {
     const result = publishBlogPostInputSchema.safeParse({ ...completeInput, zh: { ...completeInput.zh, slug: 'Bad Slug' } });
     expect(result.success).toBe(false);
+  });
+
+  it('defaults external creation to draft and normalizes its content', () => {
+    const result = externalBlogPostInputSchema.parse({
+      category: 'uncategorized', heroImage: '/assets/blog/nx-monorepo.svg', tagIds: ['api', 'api'], zh: {}, en: {},
+    });
+    expect(result.status).toBe('draft');
+    expect(result.tagIds).toEqual(['api']);
+  });
+
+  it('applies complete bilingual validation to direct publishing', () => {
+    const result = externalBlogPostInputSchema.safeParse({ ...completeInput, status: 'published', en: { ...completeInput.en, summary: '' } });
+    expect(result.success).toBe(false);
+  });
+
+  it('validates external idempotency keys', () => {
+    expect(idempotencyKeySchema.safeParse('job:2026-07-14.001').success).toBe(true);
+    expect(idempotencyKeySchema.safeParse('short').success).toBe(false);
+    expect(idempotencyKeySchema.safeParse('invalid key with spaces').success).toBe(false);
   });
 });

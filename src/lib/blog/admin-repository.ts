@@ -47,7 +47,9 @@ export async function publishAdminBlogPost(id: string, input: AdminBlogPostInput
     if (!updated) return null;
     const now = new Date().toISOString();
     await client.query(
-      `update blog_posts set published = true, status = 'published', published_at = $2, updated_at = $2 where id = $1`,
+      `update blog_posts set published = true, status = 'published',
+                             published_at = $2::timestamptz, updated_at = $2::text
+       where id = $1`,
       [id, now],
     );
     return getAdminBlogPost(id, client);
@@ -58,6 +60,17 @@ export async function unpublishAdminBlogPost(id: string, database: DatabaseClien
   const result = await database.query(
     `update blog_posts set published = false, status = 'draft', updated_at = $2 where id = $1`,
     [id, new Date().toISOString()],
+  );
+  return result.rowCount ? getAdminBlogPost(id, database) : null;
+}
+
+export async function markAdminBlogPostPublished(id: string, database: DatabaseClient = getAdminPool()) {
+  const now = new Date().toISOString();
+  const result = await database.query(
+    `update blog_posts set published = true, status = 'published',
+                           published_at = $2::timestamptz, updated_at = $2::text
+     where id = $1`,
+    [id, now],
   );
   return result.rowCount ? getAdminBlogPost(id, database) : null;
 }

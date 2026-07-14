@@ -2,7 +2,10 @@ import { randomUUID } from 'node:crypto';
 import { HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { marked } from 'marked';
+import type { Pool, PoolClient } from 'pg';
 import { getAdminPool } from './admin-repository';
+
+type DatabaseClient = Pool | PoolClient;
 
 const extensionByType: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -53,16 +56,20 @@ export async function completeBlogAssetUpload(id: string) {
   return { id: asset.id, publicUrl: asset.public_url, contentType: asset.content_type, sizeBytes: asset.size_bytes };
 }
 
-export async function isAllowedBlogAssetUrl(url: string) {
+export async function isAllowedBlogAssetUrl(url: string, database: DatabaseClient = getAdminPool()) {
   if (url.startsWith('/assets/')) return true;
-  const result = await getAdminPool().query(
+  const result = await database.query(
     `select 1 from blog_assets where public_url = $1 and status = 'ready'`,
     [url],
   );
   return Boolean(result.rowCount);
 }
 
-export async function findInvalidBlogAssetUrl(heroImage: string, bodies: string[]) {
+export async function findInvalidBlogAssetUrl(
+  heroImage: string,
+  bodies: string[],
+  database: DatabaseClient = getAdminPool(),
+) {
   const urls = new Set([heroImage]);
   for (const body of bodies) {
     const tokens = marked.lexer(body);
@@ -71,7 +78,7 @@ export async function findInvalidBlogAssetUrl(heroImage: string, bodies: string[
     });
   }
   for (const url of urls) {
-    if (!(await isAllowedBlogAssetUrl(url))) return url;
+    if (!(await isAllowedBlogAssetUrl(url, database))) return url;
   }
   return null;
 }
