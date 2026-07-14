@@ -322,11 +322,11 @@ export function buildTopicJsonLd(locale: Locale, slug: keyof typeof TOPIC_ROUTE_
   });
 }
 
-export function getBlogAlternates(currentLocale: Locale, slug: string) {
+export async function getBlogAlternates(currentLocale: Locale, slug: string) {
   const alternatePaths: Partial<Record<Locale, string>> = {};
 
   for (const locale of locales) {
-    if (getBlogPost(locale, slug)) {
+    if (await getBlogPost(locale, slug)) {
       alternatePaths[locale] = `/${locale}/blog/${slug}`;
     }
   }

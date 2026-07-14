@@ -13,7 +13,7 @@ export const revalidate = 0;
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale: localeParam } = await params;
   const locale = requireLocale(localeParam);
-  const viewModel = getHomeViewModel(locale);
+  const viewModel = await getHomeViewModel(locale);
   const isZh = locale === 'zh';
   const title = isZh ? '首页' : viewModel.dictionary.nav.home;
   const description = isZh

@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: viewModel.item.title,
     description: viewModel.item.summary,
     path: `/${locale}/blog/${encodeURIComponent(normalizedSlug)}`,
-    alternatePaths: getBlogAlternates(locale, normalizedSlug),
+    alternatePaths: await getBlogAlternates(locale, normalizedSlug),
     imagePath: viewModel.item.heroImage,
     type: 'article',
     publishedTime: viewModel.item.updatedAt,

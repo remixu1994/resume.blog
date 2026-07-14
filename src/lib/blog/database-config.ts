@@ -5,7 +5,17 @@ export interface BlogDatabaseConfig {
   url?: string;
 }
 
-export function getBlogDatabaseConfig(env = process.env): BlogDatabaseConfig {
+interface BlogDatabaseEnv {
+  BLOG_DB_PROVIDER?: string;
+  BLOG_DATABASE_URL?: string;
+}
+
+export function getBlogDatabaseConfig(
+  env: BlogDatabaseEnv = {
+    BLOG_DB_PROVIDER: process.env.BLOG_DB_PROVIDER,
+    BLOG_DATABASE_URL: process.env.BLOG_DATABASE_URL,
+  },
+): BlogDatabaseConfig {
   const configuredProvider = env.BLOG_DB_PROVIDER?.trim().toLowerCase();
   const url = env.BLOG_DATABASE_URL?.trim();
 
