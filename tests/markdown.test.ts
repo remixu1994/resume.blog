@@ -62,8 +62,16 @@ flowchart LR
 
     expect(html).toContain('<figure class="mermaid-block" data-mermaid-block>');
     expect(html).toContain('<pre class="mermaid" data-mermaid>');
-    expect(html).toContain('A[&quot;Business&quot;] --&gt; B[&quot;Model&quot;]');
+    expect(html).toContain('A["Business"] --&gt; B["Model"]');
     expect(html).not.toContain('data-copy-code');
     expect(html).not.toContain('language-mermaid');
+  });
+
+  it('neutralizes raw html and unsafe link schemes', () => {
+    const html = renderMarkdown('<script>alert(1)</script>\n\n[unsafe](javascript:alert(1))');
+
+    expect(html).not.toContain('<script>');
+    expect(html).not.toContain('href="javascript:');
+    expect(html).toContain('&lt;script&gt;');
   });
 });

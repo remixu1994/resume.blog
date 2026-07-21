@@ -13,6 +13,25 @@ env:
 jobs:
   baseline-checks:
     runs-on: ubuntu-latest
+    env:
+      BLOG_DB_PROVIDER: postgres
+      BLOG_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/resume_blog
+      TEST_BLOG_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/resume_blog
+      ADMIN_API_TOKENS: ci-external-blog-token-with-at-least-32-characters
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: resume_blog
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d resume_blog"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,11 +45,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Migrate blog database
+        run: npm run blog:db:migrate
+
       - name: Lint
         run: npm run lint
 
       - name: Test
         run: npm run test
+        env:
+          BLOG_DB_PROVIDER: sqlite
+          BLOG_DATABASE_URL: ''
 
       - name: Build
         run: npm run build

@@ -48,20 +48,24 @@ export function readSqliteBlogPosts(dbPath = getBlogDatabasePath()): BlogPost[] 
       )
       .all();
 
-    return rows.flatMap(mapSqliteBlogPostRow);
+    return rows.flatMap((row) => mapSqliteBlogPostRow(row));
   } finally {
     db.close();
   }
 }
 
-export function mapSqliteBlogPostRow(row: unknown): BlogPost[] {
+export function mapSqliteBlogPostRow(row: unknown, source: BlogPost['source'] = 'sqlite'): BlogPost[] {
   const parsed = sqliteBlogPostRowSchema.parse(row);
   return (['zh', 'en'] as const)
-    .map((locale) => mapLocalizedSqliteBlogPostRow(parsed, locale))
+    .map((locale) => mapLocalizedSqliteBlogPostRow(parsed, locale, source))
     .filter((post): post is BlogPost => Boolean(post));
 }
 
-function mapLocalizedSqliteBlogPostRow(row: SqliteBlogPostRow, locale: Locale): BlogPost | null {
+function mapLocalizedSqliteBlogPostRow(
+  row: SqliteBlogPostRow,
+  locale: Locale,
+  source: BlogPost['source'],
+): BlogPost | null {
   const slug = locale === 'zh' ? row.slug_zh : row.slug_en;
   const title = locale === 'zh' ? row.title_zh : row.title_en;
   const summary = locale === 'zh' ? row.summary_zh : row.summary_en;
@@ -84,7 +88,7 @@ function mapLocalizedSqliteBlogPostRow(row: SqliteBlogPostRow, locale: Locale): 
     status: row.status,
     series: row.series || undefined,
     body,
-    source: 'sqlite',
+    source,
   });
 }
 

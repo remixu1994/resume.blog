@@ -95,8 +95,8 @@ Markdown content.`);
     ]);
   });
 
-  it('lets sqlite override markdown for the same locale and slug', () => {
-    const posts = mergeBlogSources([
+  it('lets sqlite override markdown for the same locale and slug', async () => {
+    const posts = await mergeBlogSources([
       sourceWithPosts([
         blogPost({
           id: 'md-override',
@@ -123,8 +123,8 @@ Markdown content.`);
     });
   });
 
-  it('excludes unpublished and draft posts from the public list', () => {
-    const posts = listBlogPosts('zh', [
+  it('excludes unpublished and draft posts from the public list', async () => {
+    const posts = await listBlogPosts('zh', [
       sourceWithPosts([
         blogPost({ id: 'published', slug: 'published' }),
         blogPost({ id: 'hidden', slug: 'hidden', published: false }),
@@ -135,8 +135,8 @@ Markdown content.`);
     expect(posts.map((post) => post.slug)).toEqual(['published']);
   });
 
-  it('sorts public posts by updatedAt descending', () => {
-    const posts = listBlogPosts('zh', [
+  it('sorts public posts by updatedAt descending', async () => {
+    const posts = await listBlogPosts('zh', [
       sourceWithPosts([
         blogPost({ id: 'old', slug: 'old', updatedAt: '2026-05-01' }),
         blogPost({ id: 'new', slug: 'new', updatedAt: '2026-05-03' }),
@@ -147,13 +147,13 @@ Markdown content.`);
     expect(posts.map((post) => post.slug)).toEqual(['new', 'middle', 'old']);
   });
 
-  it('returns null for a missing detail slug', () => {
-    const detail = getBlogPost('zh', 'missing', [sourceWithPosts([blogPost()])]);
+  it('returns null for a missing detail slug', async () => {
+    const detail = await getBlogPost('zh', 'missing', [sourceWithPosts([blogPost()])]);
 
     expect(detail).toBeNull();
   });
 
-  it('resolves legacy Chinese blog slugs to canonical English slugs', () => {
+  it('resolves legacy Chinese blog slugs to canonical English slugs', async () => {
     const aliases = [
       [
         '什么是架构-顶层设计-模块-组件与三大原则',
@@ -186,14 +186,14 @@ Markdown content.`);
     );
 
     for (const [legacySlug, canonicalSlug] of aliases) {
-      const detail = getBlogPost('zh', legacySlug, [source]);
+      const detail = await getBlogPost('zh', legacySlug, [source]);
 
       expect(detail?.item.slug).toBe(canonicalSlug);
       expect(detail?.item.title).toBe(`Target for ${canonicalSlug}`);
     }
   });
 
-  it('resolves old combined dotnet article slugs to split article slugs', () => {
+  it('resolves old combined dotnet article slugs to split article slugs', async () => {
     const aliases = [
       [
         'clr-and-csharp-type-system-objects-heap-and-garbage-collection',
@@ -226,16 +226,16 @@ Markdown content.`);
     );
 
     for (const [legacySlug, canonicalSlug] of aliases) {
-      const detail = getBlogPost('zh', legacySlug, [source]);
+      const detail = await getBlogPost('zh', legacySlug, [source]);
 
       expect(detail?.item.slug).toBe(canonicalSlug);
       expect(detail?.item.title).toBe(`Target for ${canonicalSlug}`);
     }
   });
 
-  it('resolves encoded detail slugs', () => {
+  it('resolves encoded detail slugs', async () => {
     const slug = 'what-is-architecture-top-level-design-modules-components-and-three-principles';
-    const detail = getBlogPost('zh', encodeURIComponent(slug), [
+    const detail = await getBlogPost('zh', encodeURIComponent(slug), [
       sourceWithPosts([
         blogPost({
           slug,
@@ -317,7 +317,7 @@ Keep this section.`);
       importBlogDraftsIntoSqlite({ dbPath, sourceConfigs });
       process.env.BLOG_DB_PATH = dbPath;
 
-      const viewModel = getBlogListViewModel('zh', 'architecture');
+      const viewModel = await getBlogListViewModel('zh', 'architecture');
 
       expect(viewModel.items.length).toBeGreaterThan(0);
       expect(viewModel.items.every((post) => post.category === 'architecture')).toBe(true);

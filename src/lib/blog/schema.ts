@@ -16,7 +16,7 @@ export const blogPostSchema = z.object({
   published: z.boolean(),
   status: z.enum(['draft', 'published']),
   body: z.string().min(1),
-  source: z.enum(['md', 'sqlite']),
+  source: z.enum(['md', 'sqlite', 'database']),
   series: z.string().min(1).optional(),
 }) satisfies z.ZodType<BlogPost>;
 

@@ -10,6 +10,7 @@ import {
   buildSitemapEntries,
   buildTopicJsonLd,
   buildTopicMetadata,
+  getAssetUrl,
   getSiteOrigin,
   getSiteUrl,
 } from '@/lib/seo';
@@ -73,6 +74,15 @@ describe('seo helpers', () => {
     expect(getSiteUrl('/zh/blog')).toBe('https://resume.example.com/zh/blog');
   });
 
+  it('preserves absolute object-storage asset URLs', () => {
+    process.env.SITE_URL = 'https://resume.example.com';
+
+    expect(getAssetUrl('https://assets.example.com/blog/hero.webp')).toBe(
+      'https://assets.example.com/blog/hero.webp',
+    );
+    expect(getAssetUrl('/assets/blog/hero.webp')).toBe('https://resume.example.com/assets/blog/hero.webp');
+  });
+
   it('builds topic metadata with localized alternates and hero image', () => {
     process.env.SITE_URL = 'https://resume.example.com';
 
@@ -133,15 +143,15 @@ describe('seo helpers', () => {
     });
   });
 
-  it('builds sitemap entries for localized sections and content details', () => {
+  it('builds sitemap entries for localized sections and content details', async () => {
     process.env.SITE_URL = 'https://resume.example.com';
-    const entries = buildSitemapEntries();
+    const entries = await buildSitemapEntries();
 
     const urls = new Set(entries.map((entry: (typeof entries)[number]) => entry.url));
     const zhArchitecture = getArchitectureCases('zh')[0];
     const zhTopic = getTopicBySlug('zh', 'unraid');
     const zhRecipe = listRecipes({ locale: 'zh' })[0];
-    const zhPost = listBlogPosts('zh')[0];
+    const zhPost = (await listBlogPosts('zh'))[0];
 
     expect(urls.has('https://resume.example.com/')).toBe(true);
     expect(urls.has('https://resume.example.com/zh')).toBe(true);

@@ -35,12 +35,12 @@ function buildItemXml(post: BlogPostSummary, origin: string): string {
     </item>`;
 }
 
-export function buildRssFeed(locale?: Locale): string {
+export async function buildRssFeed(locale?: Locale): Promise<string> {
   const origin = getSiteOrigin();
   const targetLocales = locale ? [locale] : locales;
 
-  const allPosts = targetLocales
-    .flatMap((loc) => listBlogPosts(loc))
+  const allPosts = (await Promise.all(targetLocales.map((loc) => listBlogPosts(loc))))
+    .flat()
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
   const language = locale ? FEED_LANGUAGE_MAP[locale] : 'zh-cn';

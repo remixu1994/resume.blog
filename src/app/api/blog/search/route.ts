@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ results: [], query: '', locale });
   }
 
-  const results = searchBlogPosts(q, locale);
+  const results = await searchBlogPosts(q, locale);
 
   // Return results without body content (only search-relevant fields)
   const response = results.map(({ id, slug, locale: postLocale, title, summary, highlightedTitle, highlightedSummary, highlightedSnippet, category, heroImage, updatedAt, tags, series }) => ({

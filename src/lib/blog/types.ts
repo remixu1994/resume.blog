@@ -1,6 +1,6 @@
 import type { Locale, PostStatus } from '@devfolio-blog/shared-types';
 
-export type BlogSource = 'md' | 'sqlite';
+export type BlogSource = 'md' | 'sqlite' | 'database';
 
 export interface BlogPost {
   id: string;
@@ -28,5 +28,5 @@ export interface BlogPostQuery {
 }
 
 export interface BlogContentSource {
-  listPosts(): BlogPost[];
+  listPosts(): BlogPost[] | Promise<BlogPost[]>;
 }

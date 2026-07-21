@@ -1,6 +1,8 @@
 import type { Locale } from '@devfolio-blog/shared-types';
 import type { BlogPost, BlogContentSource } from './types';
 import { mergeBlogSources } from './repository';
+import { getBlogDatabaseConfig } from './database-config';
+import { createRemoteBlogSource } from './remote-source';
 import { createSqliteBlogSource } from './sqlite-source';
 
 export interface SearchResult {
@@ -24,18 +26,18 @@ export interface SearchResult {
  * Search blog posts in-memory across title, summary, and body.
  * Returns results with highlighted matching text using <mark> tags.
  */
-export function searchBlogPosts(
+export async function searchBlogPosts(
   query: string,
   locale: Locale,
   sources?: BlogContentSource[],
-): SearchResult[] {
+): Promise<SearchResult[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
 
   const terms = trimmed.toLowerCase().split(/\s+/).filter(Boolean);
   if (terms.length === 0) return [];
 
-  const allPosts = mergeBlogSources(sources ?? getDefaultBlogSources());
+  const allPosts = await mergeBlogSources(sources ?? getDefaultBlogSources());
   const localePosts = allPosts.filter(
     (post) => post.published && post.status === 'published' && post.locale === locale,
   );
@@ -173,5 +175,6 @@ function escapeRegex(str: string): string {
 }
 
 function getDefaultBlogSources(): BlogContentSource[] {
-  return [createSqliteBlogSource()];
+  const config = getBlogDatabaseConfig();
+  return [config.provider === 'sqlite' ? createSqliteBlogSource() : createRemoteBlogSource(config)];
 }

@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale: localeParam, slug } = await params;
   const locale = requireLocale(localeParam);
   const normalizedSlug = resolveBlogSlug(decodeRouteSlug(slug));
-  const viewModel = getBlogDetailViewModel(locale, normalizedSlug);
+  const viewModel = await getBlogDetailViewModel(locale, normalizedSlug);
   if (!viewModel) {
     return buildMetadata({
       locale,
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: viewModel.item.title,
     description: viewModel.item.summary,
     path: `/${locale}/blog/${encodeURIComponent(normalizedSlug)}`,
-    alternatePaths: getBlogAlternates(locale, normalizedSlug),
+    alternatePaths: await getBlogAlternates(locale, normalizedSlug),
     imagePath: viewModel.item.heroImage,
     type: 'article',
     publishedTime: viewModel.item.updatedAt,
@@ -52,7 +52,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ loc
     redirect(canonicalPath);
   }
 
-  const viewModel = getBlogDetailViewModel(locale, normalizedSlug);
+  const viewModel = await getBlogDetailViewModel(locale, normalizedSlug);
   if (!viewModel) notFound();
 
   return (

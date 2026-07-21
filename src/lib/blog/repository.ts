@@ -1,17 +1,19 @@
 import { renderMarkdown } from '@devfolio-blog/markdown';
 import type { Locale } from '@devfolio-blog/shared-types';
 import { resolveBlogSlug } from './slug-aliases';
+import { getBlogDatabaseConfig } from './database-config';
+import { createRemoteBlogSource } from './remote-source';
 import { createSqliteBlogSource } from './sqlite-source';
 import type { BlogContentSource, BlogPost, BlogPostSummary } from './types';
 
-export function listBlogPosts(locale: Locale, sources = getDefaultBlogSources()): BlogPostSummary[] {
-  return toPublicPosts(mergeBlogSources(sources))
+export async function listBlogPosts(locale: Locale, sources = getDefaultBlogSources()): Promise<BlogPostSummary[]> {
+  return toPublicPosts(await mergeBlogSources(sources))
     .filter((post) => post.locale === locale)
     .map(toSummary);
 }
 
-export function getBlogPost(locale: Locale, slug: string, sources = getDefaultBlogSources()) {
-  const posts = toPublicPosts(mergeBlogSources(sources)).filter((post) => post.locale === locale);
+export async function getBlogPost(locale: Locale, slug: string, sources = getDefaultBlogSources()) {
+  const posts = toPublicPosts(await mergeBlogSources(sources)).filter((post) => post.locale === locale);
   const normalizedSlug = resolveBlogSlug(normalizeRouteSlug(slug));
   const item = posts.find((post) => post.slug === normalizedSlug);
 
@@ -84,11 +86,11 @@ function getRelatedTagIds(post: BlogPostSummary) {
   return post.tagIds?.length ? post.tagIds : post.tags;
 }
 
-export function mergeBlogSources(sources: BlogContentSource[]) {
+export async function mergeBlogSources(sources: BlogContentSource[]) {
   const posts = new Map<string, BlogPost>();
 
   for (const source of sources) {
-    for (const post of source.listPosts()) {
+    for (const post of await source.listPosts()) {
       posts.set(`${post.locale}:${post.slug}`, post);
     }
   }
@@ -97,7 +99,8 @@ export function mergeBlogSources(sources: BlogContentSource[]) {
 }
 
 function getDefaultBlogSources(): BlogContentSource[] {
-  return [createSqliteBlogSource()];
+  const config = getBlogDatabaseConfig();
+  return [config.provider === 'sqlite' ? createSqliteBlogSource() : createRemoteBlogSource(config)];
 }
 
 function toPublicPosts(posts: BlogPost[]) {
