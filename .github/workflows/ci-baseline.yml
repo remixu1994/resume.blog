@@ -53,6 +53,9 @@ jobs:
 
       - name: Test
         run: npm run test
+        env:
+          BLOG_DB_PROVIDER: sqlite
+          BLOG_DATABASE_URL: ''
 
       - name: Build
         run: npm run build
