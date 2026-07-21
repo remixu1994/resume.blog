@@ -39,6 +39,16 @@ export function getSiteUrl(path = '/') {
   return new URL(normalizePath(path), `${getSiteOrigin()}/`).toString();
 }
 
+export function getAssetUrl(value: string) {
+  try {
+    const url = new URL(value);
+    if (url.protocol === 'http:' || url.protocol === 'https:') return url.toString();
+  } catch {
+    // Site-relative asset path.
+  }
+  return getSiteUrl(value);
+}
+
 export function buildMetadata({
   locale,
   title,
@@ -55,7 +65,7 @@ export function buildMetadata({
 }: MetadataInput): Metadata {
   const canonicalPath = normalizePath(path);
   const languageAlternates = buildLanguageAlternates(locale, canonicalPath, alternatePaths);
-  const imageUrl = getSiteUrl(imagePath);
+  const imageUrl = getAssetUrl(imagePath);
 
   return {
     title,
@@ -230,7 +240,7 @@ export function buildArticleJsonLd({
     description,
     inLanguage: locale,
     url: getSiteUrl(path),
-    image: imagePath ? [getSiteUrl(imagePath)] : undefined,
+    image: imagePath ? [getAssetUrl(imagePath)] : undefined,
     datePublished: publishedTime,
     dateModified: modifiedTime,
     keywords,
@@ -254,7 +264,7 @@ export function buildRecipeJsonLd(locale: Locale, path: string, recipe: RecipeDe
     description: recipe.summary,
     inLanguage: locale,
     url: getSiteUrl(path),
-    image: recipe.coverImage ? [getSiteUrl(recipe.coverImage)] : undefined,
+    image: recipe.coverImage ? [getAssetUrl(recipe.coverImage)] : undefined,
     dateModified: recipe.updatedAt,
     totalTime: `PT${recipe.durationMinutes}M`,
     recipeYield: recipe.servings,

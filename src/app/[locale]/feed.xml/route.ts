@@ -1,11 +1,7 @@
 import { buildRssFeed } from '@/lib/rss';
 import { requireLocale } from '@/lib/locale';
 
-export const dynamic = 'force-static';
-
-export function generateStaticParams() {
-  return [{ locale: 'zh' }, { locale: 'en' }];
-}
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   _request: Request,
@@ -18,7 +14,7 @@ export async function GET(
   return new Response(xml, {
     headers: {
       'Content-Type': 'application/rss+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+      'Cache-Control': 'no-store',
     },
   });
 }

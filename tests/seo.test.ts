@@ -10,6 +10,7 @@ import {
   buildSitemapEntries,
   buildTopicJsonLd,
   buildTopicMetadata,
+  getAssetUrl,
   getSiteOrigin,
   getSiteUrl,
 } from '@/lib/seo';
@@ -71,6 +72,15 @@ describe('seo helpers', () => {
 
     expect(getSiteOrigin()).toBe('https://resume.example.com');
     expect(getSiteUrl('/zh/blog')).toBe('https://resume.example.com/zh/blog');
+  });
+
+  it('preserves absolute object-storage asset URLs', () => {
+    process.env.SITE_URL = 'https://resume.example.com';
+
+    expect(getAssetUrl('https://assets.example.com/blog/hero.webp')).toBe(
+      'https://assets.example.com/blog/hero.webp',
+    );
+    expect(getAssetUrl('/assets/blog/hero.webp')).toBe('https://resume.example.com/assets/blog/hero.webp');
   });
 
   it('builds topic metadata with localized alternates and hero image', () => {

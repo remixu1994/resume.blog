@@ -1,6 +1,6 @@
 # Production blog database
 
-Blog content must not be stored in the deployed repository or in an ephemeral container filesystem. The application uses SQLite locally when no remote configuration is present, and switches to PostgreSQL or MySQL when `BLOG_DATABASE_URL` is configured.
+Blog content must not be stored in the deployed repository or in an ephemeral container filesystem. The application uses SQLite locally when no remote configuration is present and PostgreSQL in production when `BLOG_DATABASE_URL` is configured.
 
 ## Configure the application
 
@@ -11,7 +11,7 @@ BLOG_DB_PROVIDER=postgres
 BLOG_DATABASE_URL=postgresql://blog_user:password@db.example.com:5432/resume_blog
 ```
 
-For MySQL, use `BLOG_DB_PROVIDER=mysql` and a `mysql://` URL. The provider can be inferred from the URL, but setting it explicitly makes a misconfiguration easier to spot.
+The admin publishing and schema migration flow supports PostgreSQL. MySQL is not a supported production deployment target.
 
 Do not set these values in source control. `.env.example` contains only placeholders.
 
@@ -30,7 +30,7 @@ The command creates the `blog_posts` table and its locale slug indexes. It is sa
 After the remote schema is ready, copy the existing local content before deploying the remote configuration:
 
 ```bash
-npm run blog:db:migrate
+npm run blog:db:import-sqlite
 ```
 
 The migration reads `BLOG_DB_PATH` (or `data/blog.sqlite`) and upserts every blog group to the configured remote database. It is safe to repeat. Run it from a machine that has the source SQLite file and network access to the production database; do not commit the SQLite file as part of a deployment workflow.
@@ -38,10 +38,10 @@ The migration reads `BLOG_DB_PATH` (or `data/blog.sqlite`) and upserts every blo
 ## Runtime behavior
 
 - No `BLOG_DATABASE_URL`: reads the existing SQLite file at `BLOG_DB_PATH` or `data/blog.sqlite`.
-- PostgreSQL/MySQL configured: public blog routes read only rows where `published = true` and `status = 'published'`.
+- PostgreSQL configured: public blog routes read only rows where `published = true` and `status = 'published'`.
 - Connections are pooled per Node.js process, so published content changes become visible on the next dynamic request without rebuilding or redeploying the site.
 
-The existing Markdown-to-SQLite importer remains a local seed workflow. Before production publishing is enabled, add a corresponding remote import or use the planned admin publishing API to write directly to the configured database.
+The existing Markdown-to-SQLite importer remains a local seed workflow. Use `blog:db:import-sqlite` to copy those rows into PostgreSQL before enabling the production database configuration.
 
 ## Admin publishing
 

@@ -70,6 +70,8 @@ export function AdminPostEditor({ initialPost }: { initialPost: AdminBlogPost })
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
+    const target = uploadTarget;
+    const targetLocale = locale;
     setBusy('upload');
     setNotice({ tone: 'neutral', message: '正在上传图片' });
     try {
@@ -84,8 +86,21 @@ export function AdminPostEditor({ initialPost }: { initialPost: AdminBlogPost })
       const completeResponse = await fetch(`/api/admin/blog/assets/${created.asset.id}/complete`, { method: 'POST' });
       const completed = await completeResponse.json();
       if (!completeResponse.ok) throw new Error(completed?.error?.message || '无法确认上传结果。');
-      if (uploadTarget === 'hero') updateBase('heroImage', completed.asset.publicUrl);
-      else updateLocalized('body', `${post[locale].body.trimEnd()}\n\n![${file.name}](${completed.asset.publicUrl})\n`);
+      if (target === 'hero') {
+        updateBase('heroImage', completed.asset.publicUrl);
+      } else {
+        setPost((current) => {
+          const body = current[targetLocale].body.trimEnd();
+          const separator = body ? '\n\n' : '';
+          return {
+            ...current,
+            [targetLocale]: {
+              ...current[targetLocale],
+              body: `${body}${separator}![${file.name}](${completed.asset.publicUrl})\n`,
+            },
+          };
+        });
+      }
       setNotice({ tone: 'success', message: '图片已上传，保存文章后生效' });
     } catch (error) {
       setNotice({ tone: 'error', message: error instanceof Error ? error.message : '图片上传失败。' });
